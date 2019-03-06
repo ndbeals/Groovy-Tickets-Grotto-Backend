@@ -15,28 +15,5 @@ public class Transaction
     {
 
     }
-    private void create()
-    {
 
-    }
-    private void delete()
-    {
-
-    }
-    private void sell()
-    {
-
-    }
-    private void buy()
-    {
-
-    }
-    private void refund()
-    {
-
-    }
-    private void addCredit()
-    {
-        
-    }
 }
