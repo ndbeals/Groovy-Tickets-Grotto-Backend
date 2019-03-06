@@ -1,19 +1,12 @@
 package com.groovy_tickets_grotto.backend;
 import java.util.*;
-public class Transaction
+public abstract class Transaction
 {   
     private User CurrentUser;
-
-    public Transaction(String transaction, 
-                        ArrayList<User> users)
-    {
-        
-    }
-    public Transaction(String transaction, 
-                        ArrayList<User> users,
-                        ArrayList<TicketBatch> tickets)
+    
+    abstract void runTransaction( Session sess );
+    public static void parse(String transaction)
     {
 
     }
-
 }

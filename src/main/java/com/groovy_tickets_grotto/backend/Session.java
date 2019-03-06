@@ -53,7 +53,7 @@ public class Session
         String transactionString = null;
         while((transactionString = bufReader.readLine()) != null)
         {
-            Transaction transaction = new Transaction(transactionString, Users, Tickets);
+             Transaction.parse(transactionString);
         }
 
     }
