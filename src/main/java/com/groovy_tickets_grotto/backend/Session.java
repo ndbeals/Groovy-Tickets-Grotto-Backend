@@ -3,15 +3,26 @@ import java.util.*;
 import java.io.*;
 
 import org.apache.commons.cli.*;
+
+import com.groovy_tickets_grotto.*;
+
 /**
- * Hello world!
+ * Session Class
+ * This is the entrypoint to the system, this class is what "brings it all together". it contains methods for file input and output, 
+ * which are the event drivers for the backend.
  *
  */
 public class Session 
 {
+    // Constants section
+    private static final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";
+    private static final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";
+
+
+    static private Map<String,User> Users = new HashMap<String,User>();
+    static private Map<String,TicketBatch> Tickets;
+    
     private User CurrentUser;
-    private Map<String,User> Users;
-    private Map<String,TicketBatch> Tickets;
     private String CurrentTransactions;
 
     
@@ -53,6 +64,7 @@ public class Session
         }
 
     }
+
     private void saveUsers()
     {
         
@@ -60,6 +72,72 @@ public class Session
     private void saveTickets()
     {
         
+    }
+
+    /**
+     * ParseUsersFile
+     *  Parse the available users file into User class instances and store them on the static "Users" map.
+     */
+    static private void ParseUsersFile()
+    {
+        BufferedReader reader = null;
+        // create a buffered reader, and then try to open a file and read the file line by line
+        try {
+            File file = new File( AVAILABLE_USERS_FILE );
+            reader = new BufferedReader(new FileReader(file));
+
+            String line;
+            // Loop over each line, creating a user object and placing that object in the Users map
+            while ((line = reader.readLine()) != null) {
+                System.out.println("|" + line.trim() + "|");
+                
+                // parse line string into user if it isn't the end line
+                if ( !line.trim().equals("END") ) {
+                    User aUser = new User( line );
+                    // Users[ aUser.getUsername() ] = aUser;
+                    System.out.println( "a user: " + aUser.getUsername() );
+                    Users.put( aUser.getUsername(), aUser);
+                    
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * ParseTicketsFile
+     *  Parse the available tickets file and parse them into TicketBatch instances, populatice the static "Tickets" map
+     */
+    static private void ParseTicketsFile()
+    {
+        BufferedReader reader = null;
+        // create a buffered reader, and then try to open a file and read the file line by line
+        try {
+            File file = new File( AVAILABLE_TICKETS_FILE );
+            reader = new BufferedReader(new FileReader(file));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     private void parseCommandLineArguments( String[] args )
@@ -110,6 +188,9 @@ public class Session
 
 
         Session thisSession = new Session();
+
+        // ParseTicketsFile();
+        ParseUsersFile();
         
 
         thisSession.parseCommandLineArguments( args );

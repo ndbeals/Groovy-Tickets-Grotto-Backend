@@ -1,0 +1,8 @@
+admin           AA 001000.00
+userFS          FS 001000.00
+userSS          SS 001000.00
+userBS          BS 001000.00
+userDeleteTest  FS 001000.00
+brokeuser       FS 000000.00
+richuser        FS 999998.00
+END                         
