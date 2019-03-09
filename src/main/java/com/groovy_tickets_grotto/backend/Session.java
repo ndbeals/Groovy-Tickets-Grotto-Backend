@@ -15,11 +15,11 @@ import com.groovy_tickets_grotto.*;
 public class Session 
 {
     // Constants section
-    private static final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";
-    private static final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";
+    static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";
+    static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";
 
-    private static final String ERROR_PROMPT = "ERROR: ";
-    private static final String END_OF_FILE_STRING = "END";
+    static private final String ERROR_PROMPT = "ERROR: ";
+    static private final String END_OF_FILE_STRING = "END";
 
 
     static private Map<String,User> Users = new HashMap<String,User>();
@@ -71,8 +71,8 @@ public class Session
         String transactionString = null;
         while((transactionString = bufReader.readLine()) != null)
         {
-             Transaction t = Transaction.parse(transactionString, this);
-             t.runTransaction();
+             Transaction t = Transaction.CreateTransactionFromString(transactionString, this);
+            //  t.runTransaction();
         }
 
     }
@@ -189,9 +189,12 @@ public class Session
         }
     }
     
-    private void parseCommandLineArguments( String[] args )
+    /** parseCLIArguments
+     * parse string passed to the executable into paths to the relevant files
+     */
+    private void parseCLIArguments( String[] args )
     {
-        System.out.println("hello\n");
+        // System.out.println("hello\n");
         
 
         // Option input = new Option("i", "input", true, "input file path");
@@ -230,24 +233,28 @@ public class Session
      * The entry point for the backend of the system. 
      * @param args the file names for the daily transaction file, users file and tickets file
      */
-    public static void main( String[] args )
+    static public void main( String[] args )
     {
-        System.out.println( "Hello World!" );
-        System.out.println( "Hello World2" );
-
-
+        // System.out.println( "Hello World!" );
+        // System.out.println( "Hello World2" );
+        
+        
         Session thisSession = new Session();
+        thisSession.parseCLIArguments( args );
 
         // ParseTicketsFile();
 
 
         // Read in the user file into the map
         ParseUsersFile();
-        saveUsers();
         
         // Read the available tickets into the map
         ParseTicketsFile();
 
-        thisSession.parseCommandLineArguments( args );
+        
+
+
+        
+        saveUsers();
     }
 }

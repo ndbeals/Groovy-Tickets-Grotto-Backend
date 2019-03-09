@@ -7,6 +7,13 @@ public class Delete extends Transaction{
     {
         this.session = session;
     }
+
+    public Delete( Session session , String transactionString )
+    {
+        this.session = session;
+        this.transactionString = transactionString;
+    }
+
     public void runTransaction(){
         System.out.println("RUNNING DELETE");
     }

@@ -6,37 +6,56 @@ public abstract class Transaction
 {   
     protected User CurrentUser;
     protected Session session;
+    protected String transactionString;
     
     public abstract void runTransaction( );
-    public static Transaction parse(String transaction, Session session)
+
+
+    // public Transaction( Session session , String transactionString )
+    // {
+    //     this.session = session;
+    //     this.transactionString = transactionString;
+    // }
+
+
+    public static Transaction CreateTransactionFromString(String transaction, Session session)
     {   
         Transaction t;
         String transactionCode = transaction.substring(0, 2);
+
         if (transactionCode.equals("00"))
         {
-            t = new Delete(session);
-        }else if (transactionCode.equals("01"))
+            t = new Delete(session , transaction );
+        }
+        else if ( transactionCode.equals("01") )
         {
             t = new Create(session);
-        } else if (transactionCode.equals("02"))
+        }
+        else if (transactionCode.equals("02"))
         {
             t = new Delete(session);
-        }else if (transactionCode.equals("03"))
+        }
+        else if (transactionCode.equals("03"))
         {
             t = new Sell(session);
-        }else if (transactionCode.equals("04"))
+        }
+        else if (transactionCode.equals("04"))
         {
             t = new Buy(session);
-        }else if (transactionCode.equals("05"))
+        }
+        else if (transactionCode.equals("05"))
         {
             t = new Refund(session);
-        }else if (transactionCode.equals("06"))
+        }
+        else if (transactionCode.equals("06"))
         {
             t = new AddCredit(session);
-        }else
+        }
+        else
         {
             t = null;
         }
+
         return t;
     }
 }
