@@ -82,4 +82,16 @@ public class User
     public void setUsername(String username) {
         this.username = username.trim();
     }
+    /**
+     * Returns the users in proper string format to be saved
+     */
+    public String toString() {
+        //Adds spaces to username up to length 15
+        String formattedUsername = getUsername();
+        for(int i=username.length();i<15;i++){
+            formattedUsername += " ";
+        }
+        String formattedBalance = String.format("%.2f", getBalance());
+        return formattedUsername+" "+getType().toString()+" "+("000000000"+formattedBalance).substring(formattedBalance.length());
+    }
 }

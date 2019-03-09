@@ -65,8 +65,20 @@ public class Session
 
     }
 
-    private void saveUsers()
-    {
+    static private void saveUsers()
+    {   
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter("finished_users.txt"));
+            //Iterates over the map
+            for (Map.Entry<String, User> entry : Users.entrySet())
+            {
+                writer.write(entry.getValue().toString()+"\n");
+            }
+            writer.write("END");
+            writer.close();
+        }catch(IOException e){
+
+        }
         
     }
     private void saveTickets()
@@ -191,6 +203,7 @@ public class Session
 
         // ParseTicketsFile();
         ParseUsersFile();
+        saveUsers();
         
 
         thisSession.parseCommandLineArguments( args );
