@@ -62,7 +62,7 @@ public class Session
         saveTickets();
     }
     /**
-     * Creates the appropriate transaction.
+     * Creates the appropriate transaction object from the parsed string
      * @param type the type to set
      */
     private void parseTransactions() throws IOException
@@ -76,7 +76,9 @@ public class Session
         }
 
     }
-
+    /**
+     * Saves the users map to file in the correct format.
+     */
     static private void saveUsers()
     {   
         try{
@@ -93,6 +95,9 @@ public class Session
         }
         
     }
+    /**
+     * Saves the tickets map to file in the correct format.
+     */
     private void saveTickets()
     {
         

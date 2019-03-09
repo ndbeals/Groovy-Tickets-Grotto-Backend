@@ -85,7 +85,7 @@ public class User
 	}
 
     /**
-     * Returns the users in proper string format to be saved
+     * Returns the user as a string formatted proper specification
      */
     public String toString() {
         //Adds spaces to username up to length 15

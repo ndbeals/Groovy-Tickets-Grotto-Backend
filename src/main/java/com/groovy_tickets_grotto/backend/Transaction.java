@@ -4,20 +4,19 @@ import com.groovy_tickets_grotto.backend.transactions.*;
 
 public abstract class Transaction
 {   
-    protected User CurrentUser;
     protected Session session;
     protected String transactionString;
     
+
+    /**
+     * Runs the specific actions related to each transaction ie deleting users from map
+     * adding new users to map, subtracting balances etc
+     */
     public abstract void runTransaction( );
 
-
-    // public Transaction( Session session , String transactionString )
-    // {
-    //     this.session = session;
-    //     this.transactionString = transactionString;
-    // }
-
-
+    /**
+     * Returns the proper subclass of Transaction depending on the code entered
+     */
     public static Transaction CreateTransactionFromString(String transaction, Session session)
     {   
         Transaction t;
