@@ -42,7 +42,9 @@ public class TicketBatch
     public void setEventName(String eventName) {
         this.eventName = eventName.trim();
     }
-
+    /** getSeller
+     * Returns the seller for the TicketBatch
+     */
     public User getSeller() {
         return this.seller;
     }
@@ -61,7 +63,9 @@ public class TicketBatch
         this.seller = Session.GetUserByName( seller );
         // System.out.println( "seller: " + this.seller.getUsername() );
     }
-
+    /** getAmountAvailable
+     * Returns the amount of available tickets
+     */
     public int getAmountAvailable() {
         return this.availableTickets;
     }
@@ -79,7 +83,9 @@ public class TicketBatch
     public void setAmountAvailable(String availableTickets) {
         this.availableTickets = Integer.parseInt( availableTickets );
     }
-
+    /** getCost
+     * Returns the cost of the ticket
+     */
     public float getCost() {
         return this.cost;
     }
