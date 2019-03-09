@@ -18,12 +18,24 @@ public class Session
     private static final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";
     private static final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";
 
+    private static final String ERROR_PROMPT = "ERROR: ";
+    private static final String END_OF_FILE_STRING = "END";
+
 
     static private Map<String,User> Users = new HashMap<String,User>();
-    static private Map<String,TicketBatch> Tickets;
+    static private Map<String,TicketBatch> Tickets = new HashMap<String,TicketBatch>();
     
     private User CurrentUser;
     private String CurrentTransactions;
+
+
+    /** PrintError
+     * wrapper to make printing errors easier
+     */
+    static public void PrintError( Object obj )
+    {
+        System.out.println( ERROR_PROMPT + obj.toString() );
+    }
 
     
     /**
@@ -83,31 +95,33 @@ public class Session
         BufferedReader reader = null;
         // create a buffered reader, and then try to open a file and read the file line by line
         try {
-            File file = new File( AVAILABLE_USERS_FILE );
-            reader = new BufferedReader(new FileReader(file));
-
+            File file   = new File( AVAILABLE_USERS_FILE );
+            reader      = new BufferedReader(new FileReader(file));
             String line;
+
             // Loop over each line, creating a user object and placing that object in the Users map
-            while ((line = reader.readLine()) != null) {
-                System.out.println("|" + line.trim() + "|");
-                
+            while ( (line = reader.readLine()) != null ) {
                 // parse line string into user if it isn't the end line
-                if ( !line.trim().equals("END") ) {
+                if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
                     User aUser = new User( line );
                     // Users[ aUser.getUsername() ] = aUser;
-                    System.out.println( "a user: " + aUser.getUsername() );
+                    // System.out.println( "a user: " + aUser.getBalance() );
                     Users.put( aUser.getUsername(), aUser);
-                    
                 }
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        } 
+        catch (IOException ex)
+        {
+            // catch exceptions and print them with error prefix
+            PrintError( ex.getLocalizedMessage() );
+        } 
+        finally
+        {
             try {
                 reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                // catch exceptions and print them with error prefix
+                PrintError( ex.getLocalizedMessage() );
             }
         }
     }
@@ -123,19 +137,31 @@ public class Session
         try {
             File file = new File( AVAILABLE_TICKETS_FILE );
             reader = new BufferedReader(new FileReader(file));
-
             String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+
+            // Loop over each line, creating a ticketbatch object and placing that object in the tickets map
+            while ( (line = reader.readLine()) != null ) {
+                // parse line string into ticketbatch if it isn't the end line
+                if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
+                    TicketBatch aBatch = new TicketBatch( line );
+                    // System.out.println( "a user: " + aUser.getBalance() );
+                    Users.put( aUser.getUsername(), aUser);
+                }
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        }
+        catch (IOException ex)
+        {
+            // catch exceptions and print them with error prefix
+            PrintError( ex.getLocalizedMessage() );
+        } 
+        finally
+        {
             try {
                 reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                // catch exceptions and print them with error prefix
+                PrintError( ex.getLocalizedMessage() );
             }
         }
     }
@@ -190,8 +216,13 @@ public class Session
         Session thisSession = new Session();
 
         // ParseTicketsFile();
+
+
+        // Read in the user file into the map
         ParseUsersFile();
         
+        // Read the available tickets into the map
+        ParseTicketsFile();
 
         thisSession.parseCommandLineArguments( args );
     }
