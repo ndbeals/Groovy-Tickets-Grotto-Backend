@@ -21,7 +21,7 @@ public class Session
      * @param fileName the name of the file with the transactions
      */
     private void parseTransactionFile(String fileName)throws IOException 
-    {
+    {   
         BufferedReader reader = null;
         File transactionFile = new File(fileName);
         reader = new BufferedReader(new FileReader(transactionFile));
