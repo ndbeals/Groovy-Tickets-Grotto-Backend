@@ -44,7 +44,7 @@ public class Session
      * @param fileName the name of the file with the transactions
      */
     private void parseTransactionFile(String fileName)throws IOException 
-    {
+    {   
         BufferedReader reader = null;
         File transactionFile = new File(fileName);
         reader = new BufferedReader(new FileReader(transactionFile));
@@ -77,8 +77,20 @@ public class Session
 
     }
 
-    private void saveUsers()
-    {
+    static private void saveUsers()
+    {   
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter("finished_users.txt"));
+            //Iterates over the map
+            for (Map.Entry<String, User> entry : Users.entrySet())
+            {
+                writer.write(entry.getValue().toString()+"\n");
+            }
+            writer.write("END");
+            writer.close();
+        }catch(IOException e){
+
+        }
         
     }
     private void saveTickets()
@@ -231,6 +243,7 @@ public class Session
 
         // Read in the user file into the map
         ParseUsersFile();
+        saveUsers();
         
         // Read the available tickets into the map
         ParseTicketsFile();
