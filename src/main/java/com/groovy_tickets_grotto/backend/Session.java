@@ -86,6 +86,17 @@ public class Session
         
     }
 
+    /** GetUserByName
+     * returns user class based on the string name provided, if there is one
+     * @param name the user name to find
+     * @return User class
+     */
+    static public User GetUserByName( String name )
+    {
+        // PrintError( name + " looking for");
+        return Users.get( name.trim() );
+    }
+
     /**
      * ParseUsersFile
      *  Parse the available users file into User class instances and store them on the static "Users" map.
@@ -144,8 +155,8 @@ public class Session
                 // parse line string into ticketbatch if it isn't the end line
                 if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
                     TicketBatch aBatch = new TicketBatch( line );
-                    // System.out.println( "a user: " + aUser.getBalance() );
-                    Users.put( aUser.getUsername(), aUser);
+                    // System.out.println( "batch: " + aBatch.getEventName() + " | " + aBatch.getCost() );
+                    Tickets.put( aBatch.getEventName() + aBatch.getSeller().getUsername() , aBatch );
                 }
             }
 
