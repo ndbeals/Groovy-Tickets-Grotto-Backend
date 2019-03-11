@@ -16,7 +16,7 @@ public class User
 	/** UserType
 	 * Enums to describe user class types
 	 */
-	public enum UserType{
+	static public enum UserType{
 		AA,
 		FS,
 		BS,
