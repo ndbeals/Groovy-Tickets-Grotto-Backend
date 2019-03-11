@@ -1,4 +1,8 @@
 package com.groovy_tickets_grotto.backend;
+
+/** User Class
+ * represents the users within the system
+ */
 public class User
 {
 	/**

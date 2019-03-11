@@ -2,6 +2,9 @@ package com.groovy_tickets_grotto.backend;
 import java.util.*;
 import com.groovy_tickets_grotto.backend.transactions.*;
 
+/** Transaction
+ * Parent class for all the actual transaction implementations
+ */
 public abstract class Transaction
 {   
     protected Session session;
@@ -12,7 +15,7 @@ public abstract class Transaction
      * Runs the specific actions related to each transaction ie deleting users from map
      * adding new users to map, subtracting balances etc
      */
-    public abstract void runTransaction( );
+    public abstract void RunTransaction( );
 
     /**
      * Returns the proper subclass of Transaction depending on the code entered

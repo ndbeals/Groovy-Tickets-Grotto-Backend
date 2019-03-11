@@ -1,5 +1,8 @@
 package com.groovy_tickets_grotto.backend;
 
+/** TicketBatch
+ * represents a group of tickets for sale in the system
+ */
 public class TicketBatch
 {
     private String eventName;
