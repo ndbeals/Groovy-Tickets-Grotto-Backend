@@ -48,7 +48,7 @@ import com.groovy_tickets_grotto.*;
  * which are the event drivers for the backend.
  *
  */
-public class Session 
+public class Session implements Runnable
 {
 	// Constants section
 	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";		// Available users file default location
@@ -63,13 +63,17 @@ public class Session
 	
 	// Member section
 	private User currentUser;						// current user this session is for, aka the user running all the transactions
-	private String CurrentTransactions;				// the string of all transactions (will be queue later)
+
+	public BlockingQueue<String> readQueue;		// Queue that the read thread pushes each line it reads to, as fast as possible.
 	private Deque<Transaction> transactionQueue;	// queue (deque implementation) of transactions to be ran.
+
+	public String CurrentTransactions;				// the string of all transactions (will be queue later)
 
 
 	public Session()
 	{
-		transactionQueue = new LinkedList<Transaction>();
+		transactionQueue 	= new LinkedList<Transaction>();
+		readQueue			= new LinkedBlockingQueue<String>();
 	}
 
 	public Session( String endOfSessionLine , Queue<String>sessionTransactions )
@@ -136,6 +140,33 @@ public class Session
 		}
 	}
 
+	public void run()
+	{
+		try {
+			File transactionFile = new File("mergedtransactions.trn");
+			BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
+			// ^ Create the file, file reader, and buffered reader we need.
+	
+			String line;
+			// loop over transaction file
+			while ( (line = reader.readLine()) != null )
+			{
+				// session.addTransaction( line );
+				// Thread.sleep(1);
+				System.out.println("\tthread read: " + line);
+				readQueue.put(line);
+			}
+	
+			reader.close();
+		}
+		catch (Exception e)
+		{
+			PrintError(e);
+			e.printStackTrace();
+		}
+		System.out.println("  THREAD: GOODBYE");
+	}
+
 	/**
 	 * Parses the transaction file stopping at entries stoping at
 	 * 00 entries to parse them.
@@ -159,6 +190,7 @@ public class Session
 			{
 				// session.addTransaction( line );
 				// Thread.sleep(1);
+				// Thread.sleep(100);
 				System.out.println("\tthread read: " + line);
 				queue.put(line);
 				// CurrentTransactions += transaction;
@@ -190,7 +222,7 @@ public class Session
 			// PrintError(e.getCause());
 
 		}
-		
+		System.out.println("  THREAD: GOODBYE");
 		// saveUsers();
 		// saveTickets();
 	}
@@ -353,26 +385,28 @@ public class Session
 		parseTicketsFile();
 
 		
+		Session session = new Session();
 		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 		// parse merged transactions and execute them.
-		Thread t = new Thread(new Runnable() {
-			public void run()
-			{
-				parseTransactionFile( "mergedtransactions.trn" ,queue);
-			}
-		});
-
+		Thread t = new Thread( session );
+		// new Thread(new Runnable() {
+		// 	public void run()
+		// 	{
+		// 		session.CurrentTransactions = "testtdststs";
+		// 		parseTransactionFile( "mergedtransactions.trn" ,queue);
+		// 	}
+		// });
 		
-		Session session = new Session();
+		
 		t.start();
 		
 		do {
-			String line = queue.take();
+			String line = session.readQueue.take();
 			System.out.println("main thread read line: " + line);
 			session.addTransaction(line);
-		} while (t.isAlive() || !queue.isEmpty() );
+		} while (t.isAlive() || !session.readQueue.isEmpty() );
 		
-		System.out.println("hello world");
+		System.out.println("hello world " + session.CurrentTransactions);
 
 		// save users
 		saveUsers();
