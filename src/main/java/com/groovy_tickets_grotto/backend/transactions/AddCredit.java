@@ -7,13 +7,6 @@ import com.groovy_tickets_grotto.backend.*;
  */
 public class AddCredit extends Transaction
 {
-    /**
-     * Constructor, set session member to the passed argument
-     */
-    public AddCredit(Session session)
-    {
-        this.session = session;
-    }
 
     /** RunTransaction
      * runs the implementation specific functionality of this transaction

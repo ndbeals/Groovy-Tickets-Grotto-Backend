@@ -7,18 +7,18 @@ import com.groovy_tickets_grotto.backend.*;
  */
 public class Sell extends Transaction
 {
-    /**
-     * Constructor, set session member to the passed argument
-     */
-    public Sell(Session session)
-    {
-        this.session = session;
-    }
-
     /** RunTransaction
      * runs the implementation specific functionality of this transaction
     */
     public void RunTransaction( Session session ){
-        System.out.println("RUNNING SELL");
+        String eventName = ExtractEventTitle();
+        String sellerName = ExtractUsername();
+        int num = ExtractTicketAmount();
+        float price = ExtractTicketPrice();
+
+        Session.addTicketBatch( new TicketBatch(eventName,sellerName,num,price) );
+        
+        
+        System.out.println("RUNNING SELL event: " + eventName + " seller: " + sellerName + " num: " +num +" price: " + price);
     }
 }

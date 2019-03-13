@@ -68,7 +68,7 @@ public class Session implements Runnable
 	private Deque<Transaction> transactionQueue;	// queue (deque implementation) of transactions to be ran.
 
 	public String CurrentTransactions;				// the string of all transactions (will be queue later)
-
+	public boolean finishedReading = false;
 
 	public Session()
 	{
@@ -156,7 +156,6 @@ public class Session implements Runnable
 				System.out.println("\tthread read: " + line);
 				readQueue.put(line);
 			}
-	
 			reader.close();
 		}
 		catch (Exception e)
@@ -164,6 +163,7 @@ public class Session implements Runnable
 			PrintError(e);
 			e.printStackTrace();
 		}
+		finishedReading = true;
 		System.out.println("  THREAD: GOODBYE");
 	}
 
@@ -316,6 +316,11 @@ public class Session implements Runnable
 		}
 	}
 
+	static public void addTicketBatch( TicketBatch batch )
+	{
+		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
+	}
+
 	/**
 	 * parseTicketsFile
 	 *  Parse the available tickets file and parse them into TicketBatch instances, populatice the static "Tickets" map
@@ -400,13 +405,18 @@ public class Session implements Runnable
 		
 		t.start();
 		
-		do {
+		while (!session.finishedReading || !session.readQueue.isEmpty() ) {
 			String line = session.readQueue.take();
-			System.out.println("main thread read line: " + line);
-			session.addTransaction(line);
-		} while (t.isAlive() || !session.readQueue.isEmpty() );
+			// String line = session.readQueue.poll(1,TimeUnit.SECONDS);
+			if (line!=null)
+			{
+				System.out.println("main thread read line: " + line);
+				session.addTransaction(line);
+			}
+		}
 		
-		System.out.println("hello world " + session.CurrentTransactions);
+		// System.out.println("hello world " + session.CurrentTransactions);
+		System.out.println("hello world ");
 
 		// save users
 		saveUsers();

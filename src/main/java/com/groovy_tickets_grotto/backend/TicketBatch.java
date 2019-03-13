@@ -19,6 +19,15 @@ public class TicketBatch
 
     }
 
+    public TicketBatch( String event, String seller, int amount, float price )
+    {
+        super();
+        setEventName(event);
+        setSeller(seller);
+        setAmountAvailable(amount);
+        setCost(price);
+    }
+    
     /** TicketBatck Constructor
      * Takes a line from the file input "AvailableTickets.txt" as an input and parses that string into values
      * @param line the string line from the file

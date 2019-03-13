@@ -7,25 +7,26 @@ import com.groovy_tickets_grotto.backend.transactions.*;
  */
 public abstract class Transaction
 {
-    private int readPosition;
+    private byte readPosition;
 
     protected String    transactionString;
     protected byte      transactionNumber;
 
-    protected Session session;
+    // protected Session session;
 
     public Transaction()
     {
         // readPosition = 3; // set to 3 because first 3 bytes of a transaction is the code, and it's already handled
     }
 
-    public Transaction( Session session)
-    {
-        this.session = session;
-    }
+    // public Transaction( Session session)
+    // {
+    //     this.session = session;
+    // }
     
     public Transaction( String trn )
     {
+        super();
         setTransactionString( trn );
     }
 
@@ -116,26 +117,26 @@ public abstract class Transaction
         {
             t = new Create();
         }
-        // else if (transactionCode.equals("02"))
-        // {
-        //     t = new Delete();
-        // }
-        // else if (transactionCode.equals("03"))
-        // {
-        //     t = new Sell();
-        // }
-        // else if (transactionCode.equals("04"))
-        // {
-        //     t = new Buy();
-        // }
-        // else if (transactionCode.equals("05"))
-        // {
-        //     t = new Refund();
-        // }
-        // else if (transactionCode.equals("06"))
-        // {
-        //     t = new AddCredit();
-        // }
+        else if (transactionCode.equals("02"))
+        {
+            t = new Delete();
+        }
+        else if (transactionCode.equals("03"))
+        {
+            t = new Sell();
+        }
+        else if (transactionCode.equals("04"))
+        {
+            t = new Buy();
+        }
+        else if (transactionCode.equals("05"))
+        {
+            t = new Refund();
+        }
+        else if (transactionCode.equals("06"))
+        {
+            t = new AddCredit();
+        }
         else
         {
             return null;
