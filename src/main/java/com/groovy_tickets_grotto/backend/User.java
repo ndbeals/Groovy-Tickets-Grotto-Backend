@@ -39,6 +39,13 @@ public class User
 		setBalance( line.substring(19, 28) );
 	}
 	
+	public User( String name, String type, float balance )
+	{
+		setUsername(name);
+		setType(type);
+		setBalance(balance);
+	}
+
 	/** getBalance - returns user balance
 	 * @return the user balance
 	 */

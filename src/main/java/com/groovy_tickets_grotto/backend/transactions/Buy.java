@@ -17,7 +17,7 @@ public class Buy extends Transaction
     /** RunTransaction
      * runs the implementation specific functionality of this transaction
      */
-    public void RunTransaction(){
+    public void RunTransaction( Session session ){
         System.out.println("RUNNING BUY");
     }
 }

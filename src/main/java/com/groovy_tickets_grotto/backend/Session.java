@@ -35,6 +35,7 @@
 
 package com.groovy_tickets_grotto.backend;
 import java.util.*;
+import java.util.concurrent.*;
 import java.io.*;
 
 import org.apache.commons.cli.*;
@@ -50,8 +51,8 @@ import com.groovy_tickets_grotto.*;
 public class Session 
 {
 	// Constants section
-	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";    	// Available tickets file default location
 	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";		// Available users file default location
+	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";    	// Available tickets file default location
 
 	static private final String ERROR_PROMPT = "ERROR: ";								// prompt before all errors
 	static private final String END_OF_FILE_STRING = "END";								// end of file flag
@@ -61,59 +62,140 @@ public class Session
 	static private Map<String,TicketBatch> Tickets = new HashMap<String,TicketBatch>();	// Map of all tickets in the system, loaded from file
 	
 	// Member section
-	private User CurrentUser;				// current user this session is for, aka the user running all the transactions
-	private String CurrentTransactions;		// the string of all transactions (will be queue later)
+	private User currentUser;						// current user this session is for, aka the user running all the transactions
+	private String CurrentTransactions;				// the string of all transactions (will be queue later)
+	private Deque<Transaction> transactionQueue;	// queue (deque implementation) of transactions to be ran.
 
 
-	/** PrintError
-	 * wrapper to make printing errors easier
-	 */
-	static public void PrintError( Object obj )
+	public Session()
 	{
-		System.out.println( ERROR_PROMPT + obj.toString() );
+		transactionQueue = new LinkedList<Transaction>();
 	}
 
-	
-	/**
-	 * Parses the transaction file stopping at entries stoping at
-	 * 00 entries to parse them.
-	 * @param fileName the name of the file with the transactions
-	 */
-	private void parseTransactionFile(String fileName)throws IOException 
-	{   
-		File transactionFile = new File(fileName);
-		BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
+	public Session( String endOfSessionLine , Queue<String>sessionTransactions )
+	{
+		super();
+		this.currentUser = GetUserByName( endOfSessionLine.substring(3,19).trim() );
 
-		// loop over transaction file
-		String transaction;
-		while((transaction = reader.readLine())!= null)
-		{
-			CurrentTransactions += transaction;
-			if(transaction.substring(0, 2).equals("00"))
-			{
-				parseTransactions();
-			}
-		}
-		reader.close();
-		saveUsers();
-		saveTickets();
+		parseTransactions( sessionTransactions );
 	}
+
+	public User getCurrentUser() {
+		return this.currentUser;
+	}
+	public void setCurrentUser(User currentUser) {
+		this.currentUser = currentUser;
+	}
+
 
 	/**
 	 * Creates the appropriate transaction object from the parsed string
 	 * @param type the type to set
 	 */
-	private void parseTransactions() throws IOException
+	private void parseTransactions( Queue<String>sessionTransactions )
 	{
-		BufferedReader bufReader = new BufferedReader(new StringReader(CurrentTransactions));
-		String transactionString = null;
-		while((transactionString = bufReader.readLine()) != null)
-		{
-			 Transaction t = Transaction.CreateTransactionFromString(transactionString, this);
-			 t.RunTransaction();
-		}
+		System.out.println("parse trn " + this.currentUser.getUsername() );
+		while ( !sessionTransactions.isEmpty() ) {
 
+			Transaction curTrn = Transaction.CreateTransactionFromString( sessionTransactions.poll() );
+
+			curTrn.RunTransaction( this );
+		}
+		// BufferedReader bufReader = new BufferedReader(new StringReader(CurrentTransactions));
+		// String transactionString = null;
+		// while((transactionString = bufReader.readLine()) != null)
+		// {
+		// 	 Transaction t = Transaction.CreateTransactionFromString(transactionString, this);
+		// 	 t.RunTransaction( Session session );
+		// }
 	}
+
+	private void runTransactions()
+	{
+		while ( !transactionQueue.isEmpty() )
+		{
+			transactionQueue.removeFirst().RunTransaction( this );
+		}
+	}
+
+	private void addTransaction( String trn )
+	{
+		Transaction newTrn = Transaction.CreateTransactionFromString( trn );
+
+		// If the transaction is an end of session (aka begin of sesion)
+		if (newTrn.getTransactionNumber() == 0 )
+		{
+			// then add it to the start of the queue
+			transactionQueue.addFirst(newTrn);
+			// then run the queue, after this has ran the queue will be empty, and ready to accept new transactions from the next user session
+			runTransactions();
+		}
+		else
+		{
+			transactionQueue.addLast(newTrn);
+		}
+	}
+
+	/**
+	 * Parses the transaction file stopping at entries stoping at
+	 * 00 entries to parse them.
+	 * @param fileName the name of the file with the transactions
+	 */
+	static private void parseTransactionFile(String fileName,BlockingQueue<String> queue)
+	{   
+		try {
+			File transactionFile = new File(fileName);
+			BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
+			// ^ Create the file, file reader, and buffered reader we need.
+
+			// Queue<String> sessionTransactions = new LinkedList<>();
+			String line;
+
+			// Create the session object that'll be used to execute all the transactions
+			// Session session = new Session();
+
+			// loop over transaction file
+			while ( (line = reader.readLine()) != null )
+			{
+				// session.addTransaction( line );
+				// Thread.sleep(1);
+				System.out.println("\tthread read: " + line);
+				queue.put(line);
+				// CurrentTransactions += transaction;
+				// if(transaction.substring(0, 2).equals("00"))
+				// {
+				// 	System.out.println("End of Session: " + transaction + "\n queue size: " + sessionTransactions.size() );
+					
+				// 	Session currentSession = new Session( transaction , sessionTransactions );
+				// 	// sessionTransactions.clear();
+				// }
+				// else
+				// {
+				// 	// Transaction trans =  Transaction.CreateTransactionFromString(transaction, session)
+				// 	// sessionTransactions.add( trans );
+				// 	sessionTransactions.add( transaction );
+				// }
+			}
+
+			reader.close();
+		}
+		catch (Exception e)
+		{
+			//TODO: handle exception
+			// PrintError(e.getLocalizedMessage());
+			PrintError(e);
+			// PrintError(e.getMessage());
+			// PrintError(e.getClass());
+			e.printStackTrace();
+			// PrintError(e.getCause());
+
+		}
+		
+		// saveUsers();
+		// saveTickets();
+	}
+
+
 	/**
 	 * Saves the users map to file in the correct format.
 	 */
@@ -136,9 +218,19 @@ public class Session
 	/**
 	 * Saves the tickets map to file in the correct format.
 	 */
-	private void saveTickets()
+	static private void saveTickets()
 	{
 		// this function will save the tickets to the new available tickets file
+	}
+
+	static public void addUser( User newUser )
+	{
+		Users.put(newUser.getUsername(), newUser);
+
+		// for (Map.Entry<String,User> var : Users.entrySet())
+		// {
+		// 	PrintError("k: " + var.getKey() + "  v: " + var.getValue());
+		// }
 	}
 
 	/** GetUserByName
@@ -241,30 +333,59 @@ public class Session
 	}
 
 	/**
-	 * The entry point for the backend of the system. 
-	 * @param args the file names for the daily transaction file, users file and tickets file
+	 * The entry point for the backend of the system.
+	 * 
+	 * @param args the file names for the daily transaction file, users file and
+	 *             tickets file
+	 * @throws InterruptedException
 	 */
-	static public void main( String[] args )
+	static public void main(String[] args) throws InterruptedException
 	{
 		// parse the arguments that were passed to the executable
 		parseCLIArguments( args );
 		
-		Session thisSession = new Session();
-
+		// Session thisSession = new Session();
+		
 		// Read in the user file into the map
 		parseUsersFile();
 		
 		// Read the available tickets into the map
 		parseTicketsFile();
 
-		// parse merged transaction	
-		// parseTransactionFile( "mergedtransaction.txt" );
+		
+		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+		// parse merged transactions and execute them.
+		Thread t = new Thread(new Runnable() {
+			public void run()
+			{
+				parseTransactionFile( "mergedtransactions.trn" ,queue);
+			}
+		});
 
+		
+		Session session = new Session();
+		t.start();
+		
+		do {
+			String line = queue.take();
+			System.out.println("main thread read line: " + line);
+			session.addTransaction(line);
+		} while (t.isAlive() || !queue.isEmpty() );
+		
+		System.out.println("hello world");
 
 		// save users
 		saveUsers();
 
 		// also save tickets
 		// SaveTickets();
+	}
+
+	/** PrintError
+	 * wrapper to make printing errors easier
+	 */
+	static public void PrintError( Object obj )
+	{
+		System.out.println( ERROR_PROMPT + obj.toString() );
 	}
 }
