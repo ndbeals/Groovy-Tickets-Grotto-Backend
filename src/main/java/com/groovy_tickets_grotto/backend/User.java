@@ -49,7 +49,7 @@ public class User
 	/** getBalance - returns user balance
 	 * @return the user balance
 	 */
-	public double getBalance() {
+	public float getBalance() {
 		return balance;
 	}
 
@@ -94,23 +94,17 @@ public class User
 	public String getUsername() {
 		return username;
 	}
-
-    /**
-     * Returns the user as a string formatted proper specification
-     */
-    public String toString() {
-        //Adds spaces to username up to length 15
-        String formattedUsername = getUsername();
-        for(int i=username.length();i<15;i++){
-            formattedUsername += " ";
-        }
-        String formattedBalance = String.format("%.2f", getBalance());
-        return formattedUsername+" "+getType().toString()+" "+("000000000"+formattedBalance).substring(formattedBalance.length());
-    }
 	/** setUserName - set the users name
 	 * @param username the username to set
 	 */
 	public void setUsername(String username) {
 		this.username = username.trim();
 	}
+
+    /**
+     * Returns the user as a string formatted proper specification
+     */
+    public String toString() {
+		return String.format( "%-15s %2s %09.2f", getUsername(), getType(), getBalance() );
+    }
 }

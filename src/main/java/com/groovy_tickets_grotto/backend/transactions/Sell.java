@@ -19,6 +19,6 @@ public class Sell extends Transaction
         Session.addTicketBatch( new TicketBatch(eventName,sellerName,num,price) );
         
         
-        System.out.println("RUNNING SELL event: " + eventName + " seller: " + sellerName + " num: " +num +" price: " + price);
+        // System.out.println("RUNNING SELL event: " + eventName + " seller: " + sellerName + " num: " +num +" price: " + price);
     }
 }
