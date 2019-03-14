@@ -264,6 +264,13 @@ public class Session implements Runnable
 		// 	PrintError("k: " + var.getKey() + "  v: " + var.getValue());
 		// }
 	}
+	/*
+	* Removes the passed in user from the map.
+	*/
+	static public void deleteUser( User user )
+	{
+		Users.remove(user.getUsername());
+	}
 
 	/** GetUserByName
 	 * returns user class based on the string name provided, if there is one
