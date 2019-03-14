@@ -26,7 +26,7 @@ public abstract class Transaction
 	
 	public Transaction( String trn )
 	{
-		super();
+		this();
 		setTransactionString( trn );
 	}
 

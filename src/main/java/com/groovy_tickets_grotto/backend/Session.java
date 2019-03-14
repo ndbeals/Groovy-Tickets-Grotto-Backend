@@ -34,6 +34,7 @@
  */
 
 package com.groovy_tickets_grotto.backend;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
@@ -43,189 +44,171 @@ import org.apache.commons.cli.*;
 import com.groovy_tickets_grotto.*;
 
 /**
- * Session Class
- * This is the entrypoint to the system, this class is what "brings it all together". it contains methods for file input and output, 
+ * Session Class This is the entrypoint to the system, this class is what
+ * "brings it all together". it contains methods for file input and output,
  * which are the event drivers for the backend.
  *
  */
-public class Session implements Runnable
-{
+public class Session implements Runnable {
 	// Constants section
-	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt";		// Available users file default location
-	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt";    	// Available tickets file default location
+	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt"; // Available users file default
+																					// location
+	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt"; // Available tickets file default
+																					// location
 
-	static private final String ERROR_PROMPT = "ERROR: ";								// prompt before all errors
-	static private final String END_OF_FILE_STRING = "END";								// end of file flag
+	static private final String ERROR_PROMPT = "ERROR: "; // prompt before all errors
+	static private final String END_OF_FILE_STRING = "END"; // end of file flag
 
+	static private Map<String, User> Users = new HashMap<String, User>(); // Map of all users in the system, loaded from
+																			// file
+	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the
+																							// system, loaded from file
 
-	static private Map<String,User> Users = new HashMap<String,User>();					// Map of all users in the system, loaded from file
-	static private Map<String,TicketBatch> Tickets = new HashMap<String,TicketBatch>();	// Map of all tickets in the system, loaded from file
-	
 	// Member section
-	private User currentUser;						// current user this session is for, aka the user running all the transactions
+	private User currentUser; // current user this session is for, aka the user running all the transactions
 
-	public BlockingQueue<String> readQueue;		// Queue that the read thread pushes each line it reads to, as fast as possible.
-	private Deque<Transaction> transactionQueue;	// queue (deque implementation) of transactions to be ran.
+	public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
+											// possible.
+	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
 
-	public String CurrentTransactions;				// the string of all transactions (will be queue later)
+	public String CurrentTransactions; // the string of all transactions (will be queue later)
 	public boolean finishedReading = false;
 
-	public Session()
-	{
-		transactionQueue 	= new LinkedList<Transaction>();
-		readQueue			= new LinkedBlockingQueue<String>();
+	public Session() {
+		transactionQueue = new LinkedList<Transaction>();
+		readQueue = new LinkedBlockingQueue<String>();
 	}
 
-	public Session( String endOfSessionLine , Queue<String>sessionTransactions )
-	{
+	public Session(String endOfSessionLine, Queue<String> sessionTransactions) {
 		super();
-		this.currentUser = GetUserByName( endOfSessionLine.substring(3,19).trim() );
+		this.currentUser = GetUserByName(endOfSessionLine.substring(3, 19).trim());
 
-		parseTransactions( sessionTransactions );
+		parseTransactions(sessionTransactions);
 	}
 
 	public User getCurrentUser() {
 		return this.currentUser;
 	}
+
 	public void setCurrentUser(User currentUser) {
 		this.currentUser = currentUser;
 	}
 
-
 	/**
 	 * Creates the appropriate transaction object from the parsed string
+	 * 
 	 * @param type the type to set
 	 */
-	private void parseTransactions( Queue<String>sessionTransactions )
-	{
-		System.out.println("parse trn " + this.currentUser.getUsername() );
-		while ( !sessionTransactions.isEmpty() ) {
+	private void parseTransactions(Queue<String> sessionTransactions) {
+		System.out.println("parse trn " + this.currentUser.getUsername());
+		while (!sessionTransactions.isEmpty()) {
 
-			Transaction curTrn = Transaction.CreateTransactionFromString( sessionTransactions.poll() );
+			Transaction curTrn = Transaction.CreateTransactionFromString(sessionTransactions.poll());
 
-			curTrn.RunTransaction( this );
+			curTrn.RunTransaction(this);
 		}
-		// BufferedReader bufReader = new BufferedReader(new StringReader(CurrentTransactions));
+		// BufferedReader bufReader = new BufferedReader(new
+		// StringReader(CurrentTransactions));
 		// String transactionString = null;
 		// while((transactionString = bufReader.readLine()) != null)
 		// {
-		// 	 Transaction t = Transaction.CreateTransactionFromString(transactionString, this);
-		// 	 t.RunTransaction( Session session );
+		// Transaction t = Transaction.CreateTransactionFromString(transactionString,
+		// this);
+		// t.RunTransaction( Session session );
 		// }
 	}
 
-	private void runTransactions()
-	{
-		while ( !transactionQueue.isEmpty() )
-		{
-			transactionQueue.removeFirst().RunTransaction( this );
+	private void runTransactions() {
+		while (!transactionQueue.isEmpty()) {
+			transactionQueue.removeFirst(); //.RunTransaction(this);
 		}
 	}
 
-	private void addTransaction( String trn )
-	{
-		Transaction newTrn = Transaction.CreateTransactionFromString( trn );
+	private boolean addTransaction(String trn) {
+		Transaction newTrn = Transaction.CreateTransactionFromString(trn);
 
 		// If the transaction is an end of session (aka begin of sesion)
-		if (newTrn.getTransactionNumber() == 0 )
-		{
+		if (newTrn.getTransactionNumber() == 0) {
 			// then add it to the start of the queue
 			transactionQueue.addFirst(newTrn);
-			// then run the queue, after this has ran the queue will be empty, and ready to accept new transactions from the next user session
-			runTransactions();
-		}
-		else
-		{
+			// then run the queue, after this has ran the queue will be empty, and ready to
+			// accept new transactions from the next user session
+			// runTransactions();
+			return true;
+		} else {
 			transactionQueue.addLast(newTrn);
+			return false;
 		}
 	}
 
-	public void run()
-	{
+	private void readTransactionFile() {
 		try {
 			File transactionFile = new File("mergedtransactions.trn");
 			BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
 			// ^ Create the file, file reader, and buffered reader we need.
-	
-			String line;
-			// loop over transaction file
-			while ( (line = reader.readLine()) != null )
-			{
-				// session.addTransaction( line );
+
+			String line; // String var to store each line we read in
+			while ((line = reader.readLine()) != null) { // loop over transaction file
 				// Thread.sleep(1);
-				System.out.println("\tthread read: " + line);
+				// System.out.println("\tthread read: " + line);
 				readQueue.put(line);
 			}
+
+			finishedReading = true;
 			reader.close();
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			PrintError(e);
 			e.printStackTrace();
 		}
-		finishedReading = true;
-		System.out.println("  THREAD: GOODBYE");
+		System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 	}
+
+	/** run
+	 * The 'Runnable' interface requires there to be a 'run' public method to be able to create a thread with an instance of this class
+	 * so, this run just calls the readTransactionFile() method
+	 */
+	public void run()
+	{
+		readTransactionFile();
+	}
+
+	private void readAndExecuteTransactions() {
+		Thread readThread = new Thread( this );
+		readThread.start();
+
+		while ( !(finishedReading && readQueue.isEmpty()) )
+		{
+			boolean canExecute = false; // indicates whether we can execute a queue of transactions 
+			try
+			{
+				String line = readQueue.take();
+				// String line = readQueue.poll(1,TimeUnit.SECONDS);
+				// System.out.println("main thread read line: " + line);
+				canExecute = addTransaction(line);
+				
+				// Add a transaction that gets its data from the string read from the readQueue, 
+				// addTransaction returns true when it has processed an 'end of session' transaction (denoting the queue is safe to process)
+				// canExecute = addTransaction( readQueue.take() ); 
+			} catch (InterruptedException e) {
+				PrintError(e);
+			}
+
+			// If we just processed an 'end of session' transaction, then we can run all the preceeding transactions for that session
+			if ( canExecute ) {
+				runTransactions();
+				System.out.println("run trn");
+			}
+		}
+		System.out.println("MAIN    : GOODBYE: " + System.nanoTime());
+	}
+
+
 
 	/**
 	 * Parses the transaction file stopping at entries stoping at
 	 * 00 entries to parse them.
 	 * @param fileName the name of the file with the transactions
 	 */
-	static private void parseTransactionFile(String fileName,BlockingQueue<String> queue)
-	{   
-		try {
-			File transactionFile = new File(fileName);
-			BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
-			// ^ Create the file, file reader, and buffered reader we need.
-
-			// Queue<String> sessionTransactions = new LinkedList<>();
-			String line;
-
-			// Create the session object that'll be used to execute all the transactions
-			// Session session = new Session();
-
-			// loop over transaction file
-			while ( (line = reader.readLine()) != null )
-			{
-				// session.addTransaction( line );
-				// Thread.sleep(1);
-				// Thread.sleep(100);
-				System.out.println("\tthread read: " + line);
-				queue.put(line);
-				// CurrentTransactions += transaction;
-				// if(transaction.substring(0, 2).equals("00"))
-				// {
-				// 	System.out.println("End of Session: " + transaction + "\n queue size: " + sessionTransactions.size() );
-					
-				// 	Session currentSession = new Session( transaction , sessionTransactions );
-				// 	// sessionTransactions.clear();
-				// }
-				// else
-				// {
-				// 	// Transaction trans =  Transaction.CreateTransactionFromString(transaction, session)
-				// 	// sessionTransactions.add( trans );
-				// 	sessionTransactions.add( transaction );
-				// }
-			}
-
-			reader.close();
-		}
-		catch (Exception e)
-		{
-			//TODO: handle exception
-			// PrintError(e.getLocalizedMessage());
-			PrintError(e);
-			// PrintError(e.getMessage());
-			// PrintError(e.getClass());
-			e.printStackTrace();
-			// PrintError(e.getCause());
-
-		}
-		System.out.println("  THREAD: GOODBYE");
-		// saveUsers();
-		// saveTickets();
-	}
 
 
 	/**
@@ -374,14 +357,11 @@ public class Session implements Runnable
 	 * 
 	 * @param args the file names for the daily transaction file, users file and
 	 *             tickets file
-	 * @throws InterruptedException
 	 */
-	static public void main(String[] args) throws InterruptedException
+	static public void main(String[] args)
 	{
 		// parse the arguments that were passed to the executable
 		parseCLIArguments( args );
-		
-		// Session thisSession = new Session();
 		
 		// Read in the user file into the map
 		parseUsersFile();
@@ -391,32 +371,13 @@ public class Session implements Runnable
 
 		
 		Session session = new Session();
-		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+		
 		// parse merged transactions and execute them.
-		Thread t = new Thread( session );
-		// new Thread(new Runnable() {
-		// 	public void run()
-		// 	{
-		// 		session.CurrentTransactions = "testtdststs";
-		// 		parseTransactionFile( "mergedtransactions.trn" ,queue);
-		// 	}
-		// });
+		session.readAndExecuteTransactions();
 		
-		
-		t.start();
-		
-		while (!session.finishedReading || !session.readQueue.isEmpty() ) {
-			String line = session.readQueue.take();
-			// String line = session.readQueue.poll(1,TimeUnit.SECONDS);
-			if (line!=null)
-			{
-				System.out.println("main thread read line: " + line);
-				session.addTransaction(line);
-			}
-		}
 		
 		// System.out.println("hello world " + session.CurrentTransactions);
-		System.out.println("hello world ");
+		System.out.println("hello world");
 
 		// save users
 		saveUsers();
