@@ -12,6 +12,10 @@ public class AddCredit extends Transaction
      * runs the implementation specific functionality of this transaction
      */
     public void RunTransaction( Session session ){
+        User user = Session.GetUserByName(ExtractUsername());
+        ExtractUsertype();
+        float credit = ExtractCredit();
+		user.setBalance(user.getBalance()+credit);
         System.out.println("RUNNING ADDCREDIT");
     }
 }

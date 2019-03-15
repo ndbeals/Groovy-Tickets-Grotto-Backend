@@ -255,6 +255,13 @@ public class Session implements Runnable {
 		// }
 	}
 	/*
+	* Buys a ticket from a user
+	*/
+	static public TicketBatch getTicketBatchByName(String eventname)
+	{
+		return Tickets.get(eventname);
+	}
+	/*
 	* Removes the passed in user from the map.
 	*/
 	static public void deleteUser( User user )
@@ -272,7 +279,6 @@ public class Session implements Runnable {
 		// PrintError( name + " looking for");
 		return Users.get( name.trim() );
 	}
-
 	/**
 	 * parseUsersFile
 	 *  Parse the available users file into User class instances and store them on the static "Users" map.

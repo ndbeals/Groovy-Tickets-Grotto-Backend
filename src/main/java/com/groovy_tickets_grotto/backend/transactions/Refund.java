@@ -12,6 +12,9 @@ public class Refund extends Transaction
      * runs the implementation specific functionality of this transaction
     */
     public void RunTransaction( Session session ){
+        User buyer = Session.GetUserByName(ExtractUsername());
+        float refund = ExtractCredit();
+        buyer.setBalance(buyer.getBalance()+refund);
         System.out.println("RUNNING REFUND");
     }
 }
