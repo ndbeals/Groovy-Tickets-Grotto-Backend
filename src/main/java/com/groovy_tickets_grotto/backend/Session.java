@@ -67,7 +67,8 @@ public class Session implements Runnable {
 	// Member section
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
-	public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
+	// public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
+	public BlockingQueue<Transaction> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
 											// possible.
 	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
 
@@ -76,11 +77,12 @@ public class Session implements Runnable {
 
 	public Session() {
 		transactionQueue = new LinkedList<Transaction>();
-		readQueue = new LinkedBlockingQueue<String>();
+		// readQueue = new LinkedBlockingQueue<String>();
+		readQueue = new LinkedBlockingQueue<Transaction>();
 	}
 
 	public Session(String endOfSessionLine, Queue<String> sessionTransactions) {
-		super();
+		this();
 		this.currentUser = GetUserByName(endOfSessionLine.substring(3, 19).trim());
 
 		parseTransactions(sessionTransactions);
@@ -124,8 +126,9 @@ public class Session implements Runnable {
 		}
 	}
 
-	private boolean addTransaction(String trn) {
-		Transaction newTrn = Transaction.CreateTransactionFromString(trn);
+	// private boolean addTransaction(String trn) {
+	private boolean addTransaction(Transaction newTrn) {
+		// Transaction newTrn = Transaction.CreateTransactionFromString(trn);
 
 		// If the transaction is an end of session (aka begin of sesion)
 		if (newTrn.getTransactionNumber() == 0) {
@@ -148,19 +151,21 @@ public class Session implements Runnable {
 			// ^ Create the file, file reader, and buffered reader we need.
 
 			String line; // String var to store each line we read in
+			Transaction trn;
 			while ((line = reader.readLine()) != null) { // loop over transaction file
+				trn = Transaction.CreateTransactionFromString( line );
 				// Thread.sleep(1);
-				// System.out.println("\tthread read: " + line);
-				readQueue.put(line);
+				// System.out.println("\tthread read: ");
+				readQueue.put(trn);
 			}
 
 			finishedReading = true;
+			System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 			reader.close();
 		} catch (Exception e) {
 			PrintError(e);
 			e.printStackTrace();
 		}
-		System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 	}
 
 	/** run
@@ -181,10 +186,12 @@ public class Session implements Runnable {
 			boolean canExecute = false; // indicates whether we can execute a queue of transactions 
 			try
 			{
-				String line = readQueue.take();
+				// String line = readQueue.take();
+				// Transaction trn = readQueue.take();
+				Transaction trn = readQueue.poll(1,TimeUnit.SECONDS);
 				// String line = readQueue.poll(1,TimeUnit.SECONDS);
-				// System.out.println("main thread read line: " + line);
-				canExecute = addTransaction(line);
+				// System.out.println("main thread read line: ");
+				canExecute = addTransaction(trn);
 				
 				// Add a transaction that gets its data from the string read from the readQueue, 
 				// addTransaction returns true when it has processed an 'end of session' transaction (denoting the queue is safe to process)
@@ -196,7 +203,7 @@ public class Session implements Runnable {
 			// If we just processed an 'end of session' transaction, then we can run all the preceeding transactions for that session
 			if ( canExecute ) {
 				runTransactions();
-				System.out.println("run trn");
+				// System.out.println("run trn");
 			}
 		}
 		System.out.println("MAIN    : GOODBYE: " + System.nanoTime());
