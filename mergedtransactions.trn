@@ -1,4 +1,6 @@
 01 test            FS 001000.00
+02 userSS          FS 001000.00
+05 admin           userFS          1000.00
 00 admin           AA 001000.00
 03 tEve                      admin           5   016.00
 04 Test Event Title          admin           100 025.00
