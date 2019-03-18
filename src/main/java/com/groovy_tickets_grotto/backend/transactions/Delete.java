@@ -12,8 +12,9 @@ public class Delete extends Transaction
      * runs the implementation specific functionality of this transaction
      */
     public void RunTransaction( Session session ){
-        User user = new User( ExtractUsername(), ExtractUsertype(), ExtractCredit() );
-        Session.deleteUser(user);
-        System.out.println("RUNNING DELETE");
+        String username = transactionString.substring(3, 18).trim();
+        session.getUsers().remove(username);
+
+        System.out.println("RAN DELETE");
     }
 }

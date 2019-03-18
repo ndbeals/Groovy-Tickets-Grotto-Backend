@@ -11,14 +11,17 @@ public class Sell extends Transaction
      * runs the implementation specific functionality of this transaction
     */
     public void RunTransaction( Session session ){
-        String eventName = ExtractEventTitle();
-        String sellerName = ExtractUsername();
-        int num = ExtractTicketAmount();
-        float price = ExtractTicketPrice();
+        String eventName = transactionString.substring(3, 28).trim();
+        String sellerName = transactionString.substring(29, 42).trim();
 
-        Session.addTicketBatch( new TicketBatch(eventName,sellerName,num,price) );
+        //Removes leading 0s whitespace etc
+        String numString = transactionString.substring(43, 46).trim().replaceFirst("^0+(?!$)", "");
+        String priceString = transactionString.substring(49, 55).trim().replaceFirst("^0+(?!$)", "");
+        int num = Integer.parseInt(numString);
+        float price = Float.parseFloat(priceString);
+
+        session.getTickets().put(eventName+sellerName, new TicketBatch(eventName, sellerName, num, price) );
         
-        
-        // System.out.println("RUNNING SELL event: " + eventName + " seller: " + sellerName + " num: " +num +" price: " + price);
+        System.out.println("RAN SELL");
     }
 }

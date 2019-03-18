@@ -49,99 +49,61 @@ import com.groovy_tickets_grotto.*;
  * which are the event drivers for the backend.
  *
  */
-public class Session implements Runnable {
+public class Session{
 	// Constants section
 	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt"; // Available users file default
-																					// location
 	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt"; // Available tickets file default
-																					// location
-
-	static private final String ERROR_PROMPT = "ERROR: "; // prompt before all errors
-	static private final String END_OF_FILE_STRING = "END"; // end of file flag
 
 	static private Map<String, User> Users = new HashMap<String, User>(); // Map of all users in the system, loaded from
-																			// file
 	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the
-																							// system, loaded from file
-
-	// Member section
+	static private final String END_OF_FILE_STRING = "END"; // end of file flag
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
-	// public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
-	public BlockingQueue<Transaction> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
-											// possible.
-	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
+	public String CurrentTransactions = ""; 
 
-	public String CurrentTransactions; // the string of all transactions (will be queue later)
-	public boolean finishedReading = false;
-
-	public Session() {
-		transactionQueue = new LinkedList<Transaction>();
-		// readQueue = new LinkedBlockingQueue<String>();
-		readQueue = new LinkedBlockingQueue<Transaction>();
+	public Session(){
+		
 	}
-
-	public Session(String endOfSessionLine, Queue<String> sessionTransactions) {
-		this();
-		this.currentUser = GetUserByName(endOfSessionLine.substring(3, 19).trim());
-
-		parseTransactions(sessionTransactions);
-	}
-
 	public User getCurrentUser() {
 		return this.currentUser;
 	}
-
+	public User getUser(String username){
+		return Users.get(username);
+	}
+	public void addUser(User user){
+		Users.put(user.getUsername(), user);
+	}
+	public void addTicketBatch(TicketBatch ticketbatch){
+		Tickets.put(ticketbatch.getEventName()+ticketbatch.getSeller(), ticketbatch);
+	}
+	public TicketBatch getTicketBatch(String eventKey){
+		return Tickets.get(eventKey);
+	}
 	public void setCurrentUser(User currentUser) {
 		this.currentUser = currentUser;
 	}
-
+	public Map<String, User> getUsers(){
+		return Users;
+	}
+	public Map<String, TicketBatch> getTickets(){
+		return Tickets;
+	}
 	/**
 	 * Creates the appropriate transaction object from the parsed string
 	 * 
 	 * @param type the type to set
 	 */
-	private void parseTransactions(Queue<String> sessionTransactions) {
-		System.out.println("parse trn " + this.currentUser.getUsername());
-		while (!sessionTransactions.isEmpty()) {
+	private void parseTransactions() throws IOException{
 
-			Transaction curTrn = Transaction.CreateTransactionFromString(sessionTransactions.poll());
-
-			curTrn.RunTransaction(this);
+		BufferedReader bufReader = new BufferedReader(new StringReader(CurrentTransactions));
+		String transactionString = "";
+		while((transactionString = bufReader.readLine()) != null)
+		{	
+			Transaction t = Transaction.CreateTransactionFromString(transactionString);
+			t.RunTransaction( this );
 		}
-		// BufferedReader bufReader = new BufferedReader(new
-		// StringReader(CurrentTransactions));
-		// String transactionString = null;
-		// while((transactionString = bufReader.readLine()) != null)
-		// {
-		// Transaction t = Transaction.CreateTransactionFromString(transactionString,
-		// this);
-		// t.RunTransaction( Session session );
-		// }
-	}
-
-	private void runTransactions() {
-		while (!transactionQueue.isEmpty()) {
-			transactionQueue.removeFirst(); //.RunTransaction(this);
-		}
-	}
-
-	// private boolean addTransaction(String trn) {
-	private boolean addTransaction(Transaction newTrn) {
-		// Transaction newTrn = Transaction.CreateTransactionFromString(trn);
-
-		// If the transaction is an end of session (aka begin of sesion)
-		if (newTrn.getTransactionNumber() == 0) {
-			// then add it to the start of the queue
-			transactionQueue.addFirst(newTrn);
-			// then run the queue, after this has ran the queue will be empty, and ready to
-			// accept new transactions from the next user session
-			// runTransactions();
-			return true;
-		} else {
-			transactionQueue.addLast(newTrn);
-			return false;
-		}
+		//Clears transactions
+		CurrentTransactions = "";
 	}
 
 	private void readTransactionFile() {
@@ -151,72 +113,20 @@ public class Session implements Runnable {
 			// ^ Create the file, file reader, and buffered reader we need.
 
 			String line; // String var to store each line we read in
-			Transaction trn;
 			while ((line = reader.readLine()) != null) { // loop over transaction file
-				trn = Transaction.CreateTransactionFromString( line );
-				// Thread.sleep(1);
-				// System.out.println("\tthread read: ");
-				readQueue.put(trn);
+				System.out.println("ADDING: "+line);
+				CurrentTransactions+=line+"\n";
+				if(line.substring(0,2).equals("00")){
+					setCurrentUser(Users.get(line.substring(3,18).trim()));
+					parseTransactions();
+				}
 			}
-
-			finishedReading = true;
-			System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 			reader.close();
 		} catch (Exception e) {
 			PrintError(e);
 			e.printStackTrace();
 		}
 	}
-
-	/** run
-	 * The 'Runnable' interface requires there to be a 'run' public method to be able to create a thread with an instance of this class
-	 * so, this run just calls the readTransactionFile() method
-	 */
-	public void run()
-	{
-		readTransactionFile();
-	}
-
-	private void readAndExecuteTransactions() {
-		Thread readThread = new Thread( this );
-		readThread.start();
-
-		while ( !(finishedReading && readQueue.isEmpty()) )
-		{
-			boolean canExecute = false; // indicates whether we can execute a queue of transactions 
-			try
-			{
-				// String line = readQueue.take();
-				// Transaction trn = readQueue.take();
-				Transaction trn = readQueue.poll(1,TimeUnit.SECONDS);
-				// String line = readQueue.poll(1,TimeUnit.SECONDS);
-				// System.out.println("main thread read line: ");
-				canExecute = addTransaction(trn);
-				
-				// Add a transaction that gets its data from the string read from the readQueue, 
-				// addTransaction returns true when it has processed an 'end of session' transaction (denoting the queue is safe to process)
-				// canExecute = addTransaction( readQueue.take() ); 
-			} catch (InterruptedException e) {
-				PrintError(e);
-			}
-
-			// If we just processed an 'end of session' transaction, then we can run all the preceeding transactions for that session
-			if ( canExecute ) {
-				runTransactions();
-				// System.out.println("run trn");
-			}
-		}
-		System.out.println("MAIN    : GOODBYE: " + System.nanoTime());
-	}
-
-
-
-	/**
-	 * Parses the transaction file stopping at entries stoping at
-	 * 00 entries to parse them.
-	 * @param fileName the name of the file with the transactions
-	 */
-
 
 	/**
 	 * Saves the users map to file in the correct format.
@@ -243,42 +153,20 @@ public class Session implements Runnable {
 	static private void saveTickets()
 	{
 		// this function will save the tickets to the new available tickets file
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter("finished_ticket.txt"));
+			//Iterates over the map
+			for (Map.Entry<String, TicketBatch> entry : Tickets.entrySet())
+			{
+				writer.write(entry.getValue().toString()+"\n");
+			}
+			writer.write("END");
+			writer.close();
+		}catch(IOException e){
+
+		}
 	}
 
-	static public void addUser( User newUser )
-	{
-		Users.put(newUser.getUsername(), newUser);
-
-		// for (Map.Entry<String,User> var : Users.entrySet())
-		// {
-		// 	PrintError("k: " + var.getKey() + "  v: " + var.getValue());
-		// }
-	}
-	/*
-	* Buys a ticket from a user
-	*/
-	static public TicketBatch getTicketBatchByName(String eventname)
-	{
-		return Tickets.get(eventname);
-	}
-	/*
-	* Removes the passed in user from the map.
-	*/
-	static public void deleteUser( User user )
-	{
-		Users.remove(user.getUsername());
-	}
-
-	/** GetUserByName
-	 * returns user class based on the string name provided, if there is one
-	 * @param name the user name to find
-	 * @return User class
-	 */
-	static public User GetUserByName( String name )
-	{
-		// PrintError( name + " looking for");
-		return Users.get( name.trim() );
-	}
 	/**
 	 * parseUsersFile
 	 *  Parse the available users file into User class instances and store them on the static "Users" map.
@@ -319,11 +207,6 @@ public class Session implements Runnable {
 		}
 	}
 
-	static public void addTicketBatch( TicketBatch batch )
-	{
-		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
-	}
-
 	/**
 	 * parseTicketsFile
 	 *  Parse the available tickets file and parse them into TicketBatch instances, populatice the static "Tickets" map
@@ -342,8 +225,7 @@ public class Session implements Runnable {
 				// parse line string into ticketbatch if it isn't the end line
 				if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
 					TicketBatch aBatch = new TicketBatch( line );
-					// System.out.println( "batch: " + aBatch.getEventName() + " | " + aBatch.getCost() );
-					Tickets.put( aBatch.getEventName() + aBatch.getSeller().getUsername() , aBatch );
+					Tickets.put( aBatch.getEventName() + aBatch.getSeller() , aBatch );
 				}
 			}
 
@@ -364,14 +246,6 @@ public class Session implements Runnable {
 		}
 	}
 	
-	/** parseCLIArguments
-	 * parse string passed to the executable into paths to the relevant files
-	 */
-	static private void parseCLIArguments( String[] args )
-	{
-		// this command will parse command line arguments passed to it, or set defualts if non were passed
-	}
-
 	/**
 	 * The entry point for the backend of the system.
 	 * 
@@ -380,37 +254,27 @@ public class Session implements Runnable {
 	 */
 	static public void main(String[] args)
 	{
-		// parse the arguments that were passed to the executable
-		parseCLIArguments( args );
-		
+		Session session = new Session();
 		// Read in the user file into the map
-		parseUsersFile();
+		session.parseUsersFile();
 		
 		// Read the available tickets into the map
-		parseTicketsFile();
+		session.parseTicketsFile();
 
-		
-		Session session = new Session();
-		
 		// parse merged transactions and execute them.
-		session.readAndExecuteTransactions();
-		
-		
-		// System.out.println("hello world " + session.CurrentTransactions);
-		System.out.println("hello world");
-
+		session.readTransactionFile();
+	
 		// save users
-		saveUsers();
+		session.saveUsers();
 
 		// also save tickets
-		// SaveTickets();
+		session.saveTickets();
 	}
-
 	/** PrintError
 	 * wrapper to make printing errors easier
 	 */
 	static public void PrintError( Object obj )
 	{
-		System.out.println( ERROR_PROMPT + obj.toString() );
+	System.out.println( "ERROR:	" + obj.toString() );
 	}
 }

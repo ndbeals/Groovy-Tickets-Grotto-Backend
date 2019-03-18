@@ -7,106 +7,22 @@ import com.groovy_tickets_grotto.backend.transactions.*;
  */
 public abstract class Transaction
 {
-	private byte readPosition;
-
 	protected String    transactionString;
-	protected byte      transactionNumber;
-
-	// protected Session session;
-
-	public Transaction()
-	{
-		// readPosition = 3; // set to 3 because first 3 bytes of a transaction is the code, and it's already handled
-	}
-
-	// public Transaction( Session session)
-	// {
-	//     this.session = session;
-	// }
-	
-	public Transaction( String trn )
-	{
-		this();
-		setTransactionString( trn );
-	}
-
-	/** setTransactionString
-	 * sets the transaction string
-	 */
-	public void setTransactionString( String trn )
-	{
-		this.transactionString = trn;
-		setTransactionNumber( Byte.parseByte( trn.substring( readPosition, readPosition+2 ) ) );
-		readPosition+=3;
-	}
-	public String getTransactionString()
-	{
-		return this.transactionString;
-	}
-
-	public byte getTransactionNumber() {
-		return this.transactionNumber;
-	}
-	public void setTransactionNumber(byte transactionNumber) {
-		this.transactionNumber = transactionNumber;
-	}
-
-
-	public String ExtractUsername()
-	{
-		readPosition += 16;
-		return this.transactionString.substring( readPosition - 16 , readPosition -1 ).trim();
-	}
-	
-	public String ExtractUsertype()
-	{
-		// System.out.println("Pos: " + readPosition + "   afterpos: " + (readPosition+3)); 
-		readPosition += 3;
-		return this.transactionString.substring( readPosition - 3, readPosition - 1 ).trim();
-	}
-
-	public float ExtractCredit()
-	{
-		readPosition += 10;
-		return Float.parseFloat( this.transactionString.substring( readPosition - 10, readPosition - 1 ).trim() );
-	}
-
-	public String ExtractEventTitle()
-	{
-		readPosition += 26;
-		return transactionString.substring( readPosition - 26, readPosition - 1 ).trim();
-	}
-
-	public int ExtractTicketAmount()
-	{
-		readPosition += 4;
-		return Integer.parseInt( transactionString.substring( readPosition - 4, readPosition - 1).trim() );
-	}
-
-	public float ExtractTicketPrice()
-	{
-		readPosition += 7;
-		return Float.parseFloat( transactionString.substring( readPosition - 7, readPosition - 1).trim() );
-	}
-
-
 	/**
 	 * Runs the specific actions related to each transaction ie deleting users from map
 	 * adding new users to map, subtracting balances etc
 	 */
 	public abstract void RunTransaction( Session session );
-
-
-	/**
-	 * STATIC SECTION
-	 */
-
+	public void setTransactionString(String tString){
+		transactionString = tString;
+	}
 	/**
 	 * Returns the proper subclass of Transaction depending on the code entered
 	 */
 	public static Transaction CreateTransactionFromString( String transaction )
 	{   
 		Transaction newTrn;
+		System.out.println("CREATING TRANSACTION: " + transaction);
 		String transactionCode = transaction.substring(0, 2);
 
 		if ( transactionCode.equals("00") )

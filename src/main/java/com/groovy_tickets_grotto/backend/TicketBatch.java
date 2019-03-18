@@ -6,7 +6,7 @@ package com.groovy_tickets_grotto.backend;
 public class TicketBatch
 {
 	private String 	eventName;
-	private User 	seller;
+	private String 	seller;
 	private int 	availableTickets;
 	private float 	cost;
 	
@@ -57,24 +57,17 @@ public class TicketBatch
 	/** getSeller
 	 * Returns the seller for the TicketBatch
 	 */
-	public User getSeller() {
+	public String getSeller() {
 		return this.seller;
 	}
 	/** setSeller
 	 * sets the seller of this batch to the provided user class Seller
 	 * @param seller the seller
 	 */
-	public void setSeller(User seller) {
-		this.seller = seller;
-	}
-	/** setSeller
-	 * sets the seller of this batch to the provided string seller, takes string as input 
-	 * @param seller the seller
-	 */
 	public void setSeller(String seller) {
-		this.seller = Session.GetUserByName( seller );
-		// System.out.println( "seller: " + this.seller.getUsername() );
+		this.seller = seller.trim();
 	}
+
 	/** getAmountAvailable
 	 * Returns the amount of available tickets
 	 */
@@ -118,6 +111,6 @@ public class TicketBatch
 	
 	public String toString()
 	{
-		return String.format( "%-25s %-15s %03d %06.2f", getEventName(), getSeller().getUsername(), getAmountAvailable(), getCost() );
+		return String.format( "%-25s %-15s %03d %06.2f", getEventName(), getSeller(), getAmountAvailable(), getCost() );
 	}
 }

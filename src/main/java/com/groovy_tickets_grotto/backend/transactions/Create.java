@@ -12,9 +12,14 @@ public class Create extends Transaction
      */
     public void RunTransaction( Session session ){
         // Create a new User, passing the extracted name, type, and credit from the transaction string.
-        User newUser = new User( ExtractUsername(), ExtractUsertype(), ExtractCredit() );
-        // Add newly created user to the map of all users.
-        Session.addUser(newUser);
-        // System.out.println("Ran Create!");
+        String username = transactionString.substring(3, 18).trim();
+        String type = transactionString.substring(19, 21);
+        float credit = Float.parseFloat(transactionString.substring(22, 31));
+
+        User newUser = new User( username, type, credit );
+        // // Add newly created user to the map of all users.
+        session.getUsers().put(username, newUser);
+        
+        System.out.println("Ran Create!");
     }
 }

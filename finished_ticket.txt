@@ -1,0 +1,5 @@
+Test Event Title          userFS          100 025.00
+tEve                      admin           005 016.00
+Test Event Title          admin           000 025.00
+Test Event Title          userSS          100 025.00
+END

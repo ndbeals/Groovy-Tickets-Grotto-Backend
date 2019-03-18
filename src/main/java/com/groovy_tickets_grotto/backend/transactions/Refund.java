@@ -12,9 +12,16 @@ public class Refund extends Transaction
      * runs the implementation specific functionality of this transaction
     */
     public void RunTransaction( Session session ){
-        User buyer = Session.GetUserByName(ExtractUsername());
-        float refund = ExtractCredit();
-        buyer.setBalance(buyer.getBalance()+refund);
-        System.out.println("RUNNING REFUND");
+        String buyerUsername = transactionString.substring(3, 18).trim();
+        String sellerUsername = transactionString.substring(19, 34).trim();
+        String creditString = transactionString.substring(35, 42).trim().replaceFirst("^0+(?!$)", "");
+        float credit = Float.parseFloat(creditString);
+
+        User buyer = session.getUsers().get(buyerUsername);
+        User seller = session.getUsers().get(sellerUsername);
+        buyer.setBalance(buyer.getBalance()+credit);
+        seller.setBalance(seller.getBalance()-credit);
+
+        System.out.println("RAN REFUND");
     }
 }
