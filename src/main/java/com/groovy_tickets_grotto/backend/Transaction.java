@@ -106,6 +106,10 @@ public abstract class Transaction
 	 */
 	public static Transaction CreateTransactionFromString( String transaction )
 	{   
+		if (transaction==null)
+		{
+			return null;
+		}
 		Transaction newTrn;
 		String transactionCode = transaction.substring(0, 2);
 

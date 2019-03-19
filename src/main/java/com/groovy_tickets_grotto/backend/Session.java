@@ -67,25 +67,25 @@ public class Session implements Runnable {
 	// Member section
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
-	// public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
-	public BlockingQueue<Transaction> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
+	public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
+	// public BlockingQueue<Transaction> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
 											// possible.
 	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
 
 	public String CurrentTransactions; // the string of all transactions (will be queue later)
+
 	public boolean finishedReading = false;
 
 	public Session() {
 		transactionQueue = new LinkedList<Transaction>();
-		// readQueue = new LinkedBlockingQueue<String>();
-		readQueue = new LinkedBlockingQueue<Transaction>();
+		readQueue = new LinkedBlockingQueue<String>();
+		// readQueue = new LinkedBlockingQueue<Transaction>();
 	}
 
 	public Session(String endOfSessionLine, Queue<String> sessionTransactions) {
 		this();
 		this.currentUser = GetUserByName(endOfSessionLine.substring(3, 19).trim());
 
-		parseTransactions(sessionTransactions);
 	}
 
 	public User getCurrentUser() {
@@ -96,39 +96,15 @@ public class Session implements Runnable {
 		this.currentUser = currentUser;
 	}
 
-	/**
-	 * Creates the appropriate transaction object from the parsed string
-	 * 
-	 * @param type the type to set
-	 */
-	private void parseTransactions(Queue<String> sessionTransactions) {
-		System.out.println("parse trn " + this.currentUser.getUsername());
-		while (!sessionTransactions.isEmpty()) {
-
-			Transaction curTrn = Transaction.CreateTransactionFromString(sessionTransactions.poll());
-
-			curTrn.RunTransaction(this);
-		}
-		// BufferedReader bufReader = new BufferedReader(new
-		// StringReader(CurrentTransactions));
-		// String transactionString = null;
-		// while((transactionString = bufReader.readLine()) != null)
-		// {
-		// Transaction t = Transaction.CreateTransactionFromString(transactionString,
-		// this);
-		// t.RunTransaction( Session session );
-		// }
-	}
-
 	private void runTransactions() {
 		while (!transactionQueue.isEmpty()) {
 			transactionQueue.removeFirst(); //.RunTransaction(this);
 		}
 	}
 
-	// private boolean addTransaction(String trn) {
-	private boolean addTransaction(Transaction newTrn) {
-		// Transaction newTrn = Transaction.CreateTransactionFromString(trn);
+	private boolean addTransaction(String trn) {
+	// private boolean addTransaction(Transaction newTrn) {
+		Transaction newTrn = Transaction.CreateTransactionFromString(trn);
 
 		// If the transaction is an end of session (aka begin of sesion)
 		if (newTrn.getTransactionNumber() == 0) {
@@ -151,21 +127,23 @@ public class Session implements Runnable {
 			// ^ Create the file, file reader, and buffered reader we need.
 
 			String line; // String var to store each line we read in
-			Transaction trn;
 			while ((line = reader.readLine()) != null) { // loop over transaction file
-				trn = Transaction.CreateTransactionFromString( line );
 				// Thread.sleep(1);
-				// System.out.println("\tthread read: ");
-				readQueue.put(trn);
+				if (line.length()>0) {
+					readQueue.put(line);
+				}
 			}
 
+			readQueue.put(""); // When we're done executing, pass an empty string to signal we're done
+			// finish and close.
 			finishedReading = true;
-			System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 			reader.close();
+
 		} catch (Exception e) {
 			PrintError(e);
 			e.printStackTrace();
 		}
+		System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 	}
 
 	/** run
@@ -180,35 +158,32 @@ public class Session implements Runnable {
 	private void readAndExecuteTransactions() {
 		Thread readThread = new Thread( this );
 		readThread.start();
+		int c = 0;
+		boolean canExecute;
 
-		while ( !(finishedReading && readQueue.isEmpty()) )
-		{
-			boolean canExecute = false; // indicates whether we can execute a queue of transactions 
-			try
-			{
-				// String line = readQueue.take();
-				// Transaction trn = readQueue.take();
-				Transaction trn = readQueue.poll(1,TimeUnit.SECONDS);
-				// String line = readQueue.poll(1,TimeUnit.SECONDS);
-				// System.out.println("main thread read line: ");
-				canExecute = addTransaction(trn);
+		// System.out.println("MAIN    :   Start: " + System.nanoTime() );
+		long st = System.nanoTime();
+		try {
+			String transactionLine = readQueue.take();
+			
+			do {
+				canExecute = addTransaction( transactionLine );
+				c++;
+				if ( canExecute ) {
+					runTransactions();
+				}
 				
-				// Add a transaction that gets its data from the string read from the readQueue, 
-				// addTransaction returns true when it has processed an 'end of session' transaction (denoting the queue is safe to process)
-				// canExecute = addTransaction( readQueue.take() ); 
-			} catch (InterruptedException e) {
-				PrintError(e);
-			}
+				transactionLine = readQueue.take();
+			} while ( transactionLine.length()>0 );
 
-			// If we just processed an 'end of session' transaction, then we can run all the preceeding transactions for that session
-			if ( canExecute ) {
-				runTransactions();
-				// System.out.println("run trn");
-			}
+		} catch (Exception e) {
+			PrintError(e);
+			// e.printStackTrace();
 		}
-		System.out.println("MAIN    : GOODBYE: " + System.nanoTime());
+		
+		System.out.println("MAIN    : GOODBYE: " + ((System.nanoTime()-st)/1000000 ) + "   trn proc: " + c + "   fin read? " +finishedReading );
 	}
-
+	
 
 
 	/**
