@@ -7,7 +7,7 @@ import com.groovy_tickets_grotto.backend.transactions.*;
  */
 public abstract class Transaction
 {
-	private byte readPosition;
+	protected byte readPosition;
 
 	protected String    transactionString;
 	protected byte      transactionNumber;

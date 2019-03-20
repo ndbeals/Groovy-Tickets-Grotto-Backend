@@ -63,7 +63,6 @@ public class Session implements Runnable {
 																			// file
 	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the
 																							// system, loaded from file
-
 	// Member section
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
@@ -75,6 +74,14 @@ public class Session implements Runnable {
 	public String CurrentTransactions; // the string of all transactions (will be queue later)
 
 	public boolean finishedReading = false;
+
+
+	/**
+	 * 											END OF VARIABLE DECLARATION
+	 * ----------------------------------------------------------------------------------------------------------------
+	 */
+
+	 
 
 	public Session() {
 		transactionQueue = new LinkedList<Transaction>();
@@ -220,22 +227,6 @@ public class Session implements Runnable {
 		// this function will save the tickets to the new available tickets file
 	}
 
-	static public void addUser( User newUser )
-	{
-		Users.put(newUser.getUsername(), newUser);
-
-		// for (Map.Entry<String,User> var : Users.entrySet())
-		// {
-		// 	PrintError("k: " + var.getKey() + "  v: " + var.getValue());
-		// }
-	}
-	/*
-	* Removes the passed in user from the map.
-	*/
-	static public void deleteUser( User user )
-	{
-		Users.remove(user.getUsername());
-	}
 
 	/** GetUserByName
 	 * returns user class based on the string name provided, if there is one
@@ -246,6 +237,24 @@ public class Session implements Runnable {
 	{
 		// PrintError( name + " looking for");
 		return Users.get( name.trim() );
+	}
+
+	static public Map<String, User> GetUsers()
+	{
+		return Users;
+	}
+
+	static public void addUser( User newUser )
+	{
+		Users.put(newUser.getUsername(), newUser);
+	}
+
+	/*
+	* Removes the passed in user from the map.
+	*/
+	static public void deleteUser( User user )
+	{
+		Users.remove(user.getUsername());
 	}
 
 	/**
@@ -291,6 +300,11 @@ public class Session implements Runnable {
 	static public void addTicketBatch( TicketBatch batch )
 	{
 		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
+	}
+
+	static public TicketBatch getTicketBatch( String eventName )
+	{
+		return Tickets.get(eventName.trim());
 	}
 
 	/**

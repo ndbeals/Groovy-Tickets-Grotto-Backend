@@ -10,7 +10,31 @@ public class Buy extends Transaction
     /** RunTransaction
      * runs the implementation specific functionality of this transaction
      */
-    public void RunTransaction( Session session ){
-        System.out.println("RUNNING BUY");
+    public void RunTransaction( Session session )
+    {
+        String eventName = ExtractEventTitle();
+        String sellerName = ExtractUsername();
+
+        TicketBatch batch = Session.getTicketBatch( eventName + sellerName );
+        
+        int amount = ExtractTicketAmount();
+        float price = batch.getCost();// ExtractTicketPrice();
+        
+        
+        User seller = batch.getSeller();
+        User buyer = session.getCurrentUser();
+
+        float cost = amount*price;
+        System.out.println("pre cred: " + buyer.getBalance() + "  pr: " + seller.getBalance());
+
+        seller.setBalance( seller.getBalance() + cost );
+        batch.setAmountAvailable( batch.getAmountAvailable() - amount );
+
+
+        
+        buyer.setBalance( buyer.getBalance() - cost );
+        System.out.println("post cred: " + buyer.getBalance() + "  po: " + seller.getBalance());
+
+        System.out.println("RUNNING BUY  " + Session.GetUsers() + " \n\n");
     }
 }

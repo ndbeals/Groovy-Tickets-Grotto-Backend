@@ -1,38 +1,43 @@
-// package com.groovy_tickets_grotto.backend;
-// import com.groovy_tickets_grotto.backend.transactions.*;
+package com.groovy_tickets_grotto.backend;
+import com.groovy_tickets_grotto.backend.transactions.*;
 
 
-// import junit.framework.*;
+import junit.framework.*;
 
-// public class AddCreditTest extends TestCase
-// {
-//     protected Session session;
-//     protected User user;
-//     protected AddCredit addCredit;
-//     protected String username;
-//     protected float credit;
+public class AddCreditTest extends TestCase
+{
+    protected Session session;
+    protected User user;
+    protected AddCredit addCredit;
+    protected float credit;
 
-//     /** setUp
-//      * Called before each test defined below is ran, this means that each test also tests what's in here.
-//      */
-//     public void setUp() {
-//         session = new Session();
+    // protected String username;
 
-//         //Adds the involved users
-//         user = new User("admin           AA 001000.00");
+    /** setUp
+     * Called before each test defined below is ran, this means that each test also tests what's in here.
+     */
+    public void setUp() {
+        session = new Session();
 
-//         username = "admin";
-//         credit = 2000.0f;
-//         session.addUser(user);
+        // //Adds the involved users
+        User user = new User( "admin", "AA", 1000.0f );
+        Session.addUser(user);
 
-//         addCredit = new AddCredit();
-//         addCredit.setTransactionString("06 admin           FS 002000.00");
-//     }
-//     public void testRunTransaction(){
-//         float previousCredit =session.getUsers().get(username).getBalance();
-//         addCredit.RunTransaction(session);
-//         float newCredit =session.getUsers().get(username).getBalance();
-//         assertEquals(credit, newCredit-previousCredit);
-//     }
+        credit = 2000.0f;
+    }
+    public void testRunTransaction(){
+        User user = Session.GetUserByName( "admin" );
+
+        addCredit = new AddCredit();
+        addCredit.setTransactionString("06 admin           FS 002000.00");
+
+        float previousCredit = user.getBalance();
+        
+        addCredit.RunTransaction(session);
+        
+        float newCredit = user.getBalance();
+        
+        assertEquals(credit, newCredit-previousCredit);
+    }
     
-// }    
+}    

@@ -7,19 +7,17 @@ import com.groovy_tickets_grotto.backend.*;
  */
 public class AddCredit extends Transaction
 {
-    String username;
-    float credit;
+    // String username;
+    // float credit;
     /** RunTransaction
      * runs the implementation specific functionality of this transaction
      */
     public void RunTransaction( Session session ){
-        //Gets the variables from the transaction string
-        // username = transactionString.substring(3, 18).trim();
-        // User user = session.getUser(username);
-        // String creditString = transactionString.substring(22, 31).trim().replaceFirst("^0+(?!$)", "");
-        // float credit = Float.parseFloat(creditString);
+        User user = Session.GetUserByName( ExtractUsername() );
+        ExtractUsertype();
+        float credit = ExtractCredit();
 
-        // user.setBalance(user.getBalance()+credit);
+        user.setBalance( user.getBalance() + credit );
         
         System.out.println("RAN ADDCREDIT");
     }

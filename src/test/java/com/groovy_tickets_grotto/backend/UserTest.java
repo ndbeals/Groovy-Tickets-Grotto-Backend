@@ -10,26 +10,32 @@ public class UserTest extends TestCase
     /** setUp
      * Called before each test defined below is ran, this means that each test also tests what's in here.
      */
-    public void setUp() {
+    public void setUp()
+    {
         user = new User("test","AA",1234.56f);
 
-        fileLine = "userDeleteTest  FS 001000.00";
+        fileLine = "userDeleteTest  FS 001000.23";
+    }
+
+    public void test_User_StringConstructor()
+    {
         fUser = new User(fileLine);
+
+        assertEquals("userDeleteTest", fUser.getUsername());
+        assertEquals(User.UserType.FS , fUser.getType() );
+        assertEquals(1000.23f , fUser.getBalance());
+        assertEquals(fileLine, fUser.toString());
     }
 
     /**
      * Loop coverage for User class.
      */
     public void testToString() {
-        assertEquals( fileLine, fUser.toString());
+        // assertEquals( fileLine, fUser.toString());
         assertEquals( "test            AA 001234.56", user.toString() );
     }
 
     public void testAttributes() {
-        assertEquals( "userDeleteTest" , fUser.getUsername() );
-        assertEquals( User.UserType.FS , fUser.getType() );
-        assertEquals( 1000.0f , fUser.getBalance() );
-
         assertEquals(user.getBalance(), 1234.56f);
 
         user.setUsername("test2");
