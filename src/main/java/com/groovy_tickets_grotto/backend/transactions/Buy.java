@@ -29,10 +29,12 @@ public class Buy extends Transaction
 
         seller.setBalance( seller.getBalance() + cost );
         batch.setAmountAvailable( batch.getAmountAvailable() - amount );
-
-
-        
         buyer.setBalance( buyer.getBalance() - cost );
+
+        if ( batch.getAmountAvailable() < 1 ) {
+            Session.RemoveTicketBatch( batch );
+        }
+        
         System.out.println("post cred: " + buyer.getBalance() + "  po: " + seller.getBalance());
 
         System.out.println("RUNNING BUY  " + Session.GetUsers() + " \n\n");

@@ -1,18 +1,17 @@
 package com.groovy_tickets_grotto.backend;
 import com.groovy_tickets_grotto.backend.transactions.*;
 
+import org.junit.Test;
 
-import junit.framework.*;
+import junit.framework.TestCase;
 
 public class CreateTest extends TestCase
 {
     protected Session session;
     protected Create create;
 
-    // protected String username;
-    // protected float credit;
-    // protected String type;
-
+    protected String username;
+    protected float credit;
 
     /** setUp
      * Called before each test defined below is ran, this means that each test also tests what's in here.
@@ -22,21 +21,23 @@ public class CreateTest extends TestCase
         session = new Session();
 
         //Sets the transaction details
-        // username = "test";
-        // credit = 1000.0f;
-        // type = "FS";
-        
-        create = new Create();
-        create.setTransactionString("01 test            FS 001000.00");
+        username = "test";
+        credit = 123456.78f;
     }
-
-
-    public void testRunTransaction(){
-        int sizePrev = Session.GetUsers().size();
-        
+    
+    @Test
+    public void test_CreateTransaction(){
+        create = new Create();
+        create.setTransactionString("01 test            FS 123456.78");
+    
         create.RunTransaction(session);
 
-        assertEquals(sizePrev+1,Session.GetUsers().size());
-    }
+        assertNotNull( Session.GetUserByName(username) );
+
+        User user = Session.GetUserByName(username);
+        assertEquals( username , user.getUsername() );
+        assertEquals( User.UserType.FS , user.getType() );
+        assertEquals( credit , user.getBalance() );
+        }
     
 }    

@@ -1,5 +1,4 @@
 package com.groovy_tickets_grotto.backend;
-import com.groovy_tickets_grotto.backend.transactions.*;
 
 import org.junit.Test;
 
@@ -7,7 +6,7 @@ import junit.framework.*;
 
 public class TransactionTest extends TestCase
 {
-    protected Session session;
+    // protected Session session;
     
     protected Transaction transaction;
     protected String transactionString;
@@ -19,11 +18,11 @@ public class TransactionTest extends TestCase
     public void setUp()
     {
         //Sets up the session
-        session = new Session();
+        // session = new Session();
     }
 
     @Test
-    public void testCreateTransaction(){
+    public void test_Transaction_CreateTransaction(){
         //Decision Coverage for CreateTransaction
         transactionString = "00 admin           AA 001000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
@@ -59,6 +58,24 @@ public class TransactionTest extends TestCase
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("AddCredit", className);
+    }
+
+    @Test
+    public void test_Transaction_ExtractMethods() {
+        transactionString = "00 admin           AA 001234.56";
+        transaction = Transaction.CreateTransactionFromString(transactionString);
+        assertEquals( 0 , transaction.getTransactionNumber() );
+        assertEquals( "admin" , transaction.ExtractUsername() );
+        assertEquals( User.UserType.AA.toString() , transaction.ExtractUsertype() );
+        assertEquals( 1234.56f , transaction.ExtractCredit() );
+
+
+        transactionString = "03 tEve                      admin           5   016.78";
+        transaction = Transaction.CreateTransactionFromString(transactionString);
+        assertEquals( "tEve" , transaction.ExtractEventTitle() );
+        assertEquals( "admin" , transaction.ExtractUsername() );
+        assertEquals( 5 , transaction.ExtractTicketAmount() );
+        assertEquals( 16.78f, transaction.ExtractTicketPrice() );
     }
     
 }    

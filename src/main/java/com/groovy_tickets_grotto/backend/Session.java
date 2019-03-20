@@ -39,9 +39,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
 
-import org.apache.commons.cli.*;
+// import org.apache.commons.cli.*;
 
-import com.groovy_tickets_grotto.*;
+// import com.groovy_tickets_grotto.*;
 
 /**
  * Session Class This is the entrypoint to the system, this class is what
@@ -263,6 +263,16 @@ public class Session implements Runnable {
 	static public void deleteUser( User user )
 	{
 		Users.remove(user.getUsername());
+	}
+
+	static public void RemoveTicketBatch( TicketBatch batch )
+	{
+		Tickets.remove(batch.getEventName()+batch.getSeller().getUsername());
+	}
+
+	static public void RemoveUser( String userName )
+	{
+		Users.remove( userName );
 	}
 
 	/**

@@ -1,5 +1,4 @@
 package com.groovy_tickets_grotto.backend;
-import com.groovy_tickets_grotto.backend.transactions.*;
 
 import org.junit.Test;
 import junit.framework.*;

@@ -73,6 +73,9 @@ public class BuyTest extends TestCase
         assertEquals(price*num, creditSeller-prevCreditSeller);
         assertEquals(-1.0f*(price*num), creditBuyer-prevCreditBuyer);
         assertEquals(num, prevNumTickets-numTickets);
+
+        // means the ticket batch has been removed from the map
+        assertNull( Session.getTicketBatch(eventName+seller) );
     }
     
 }    
