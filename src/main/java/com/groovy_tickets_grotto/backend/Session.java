@@ -51,20 +51,16 @@ import java.io.*;
  */
 public class Session implements Runnable {
 	// Constants section
-	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt"; // Available users file default
-																					// location
-	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt"; // Available tickets file default
-																					// location
+	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt"; // Available users file default location
+	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt"; // Available tickets file default location
 
 	static private final String ERROR_PROMPT = "ERROR: "; // prompt before all errors
 	static private final String END_OF_FILE_STRING = "END"; // end of file flag
 
-	static private Map<String, User> Users = new HashMap<String, User>(); // Map of all users in the system, loaded from
-																			// file
-	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the
-																							// system, loaded from file
+	static private Map<String, User> Users = new HashMap<String, User>(); // Map of all users in the system, loaded from file
+	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the system, loaded from file
 	
-																							// Member section
+	// Member section
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
 	public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
@@ -279,7 +275,7 @@ public class Session implements Runnable {
 	 * parseUsersFile
 	 *  Parse the available users file into User class instances and store them on the static "Users" map.
 	 */
-	static private void parseUsersFile()
+	static private void ReadUsersFile()
 	{
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
@@ -293,7 +289,6 @@ public class Session implements Runnable {
 				// parse line string into user if it isn't the end line
 				if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
 					User aUser = new User( line );
-					// System.out.println( "a user: " + aUser.getBalance() );
 					Users.put( aUser.getUsername(), aUser);
 				}
 			}
@@ -331,7 +326,7 @@ public class Session implements Runnable {
 	 * parseTicketsFile
 	 *  Parse the available tickets file and parse them into TicketBatch instances, populatice the static "Tickets" map
 	 */
-	static private void parseTicketsFile()
+	static private void ReadTicketsFile()
 	{
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
@@ -345,7 +340,6 @@ public class Session implements Runnable {
 				// parse line string into ticketbatch if it isn't the end line
 				if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
 					TicketBatch aBatch = new TicketBatch( line );
-					// System.out.println( "batch: " + aBatch.getEventName() + " | " + aBatch.getCost() );
 					Tickets.put( aBatch.getEventName() + aBatch.getSeller().getUsername() , aBatch );
 				}
 			}
@@ -387,19 +381,16 @@ public class Session implements Runnable {
 		parseCLIArguments( args );
 		
 		// Read in the user file into the map
-		parseUsersFile();
+		ReadUsersFile();
 		
 		// Read the available tickets into the map
-		parseTicketsFile();
-
+		ReadTicketsFile();
 		
 		Session session = new Session();
-		
 		// parse merged transactions and execute them.
 		session.readAndExecuteTransactions();
 		
 		
-		// System.out.println("hello world " + session.CurrentTransactions);
 		System.out.println("hello world");
 
 		// save users

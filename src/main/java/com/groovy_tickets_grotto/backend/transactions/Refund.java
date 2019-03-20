@@ -17,12 +17,7 @@ public class Refund extends Transaction
         User seller = Session.GetUserByName( ExtractUsername() );
         float refundAmount = ExtractCredit();
 
-        System.out.println("PRE: " + buyer + "   " + seller + "  " + refundAmount);
-        
         buyer.setBalance( buyer.getBalance() + refundAmount );
         seller.setBalance( seller.getBalance() - refundAmount );
-        System.out.println("POST: " + buyer + "   " + seller + "  " + refundAmount);
-        
-        System.out.println("RAN REFUND");
     }
 }

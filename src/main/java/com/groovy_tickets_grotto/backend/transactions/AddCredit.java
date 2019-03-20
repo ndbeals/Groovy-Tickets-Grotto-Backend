@@ -18,7 +18,5 @@ public class AddCredit extends Transaction
         float credit = ExtractCredit();
 
         user.setBalance( user.getBalance() + credit );
-        
-        System.out.println("RAN ADDCREDIT");
     }
 }

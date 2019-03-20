@@ -71,7 +71,6 @@ public class TicketBatch
 	 */
 	public void setSeller(String seller) {
 		this.seller = Session.GetUserByName( seller );
-		// System.out.println( "seller: " + this.seller.getUsername() );
 	}
 	/** getAmountAvailable
 	 * Returns the amount of available tickets

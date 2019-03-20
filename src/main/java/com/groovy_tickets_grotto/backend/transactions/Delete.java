@@ -14,7 +14,5 @@ public class Delete extends Transaction
     public void RunTransaction( Session session ){
         // Extract user name and remove that username from the map of users
         Session.RemoveUser( ExtractUsername() );
-
-        // System.out.println("RUNNING DELETE");
     }
 }

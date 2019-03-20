@@ -45,7 +45,6 @@ public abstract class Transaction
 	
 	public String ExtractUsertype()
 	{
-		// System.out.println("Pos: " + readPosition + "   afterpos: " + (readPosition+3)); 
 		readPosition += 3;
 		return this.transactionString.substring( readPosition - 3, readPosition - 1 ).trim();
 	}

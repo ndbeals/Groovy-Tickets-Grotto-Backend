@@ -1,6 +1,7 @@
 package com.groovy_tickets_grotto.backend;
 import com.groovy_tickets_grotto.backend.transactions.*;
-
+import java.lang.reflect.*;
+import java.util.*;
 import org.junit.Test;
 
 import junit.framework.*;
@@ -59,7 +60,6 @@ public class BuyTest extends TestCase
         float prevCreditSeller = userSeller.getBalance();
         float prevCreditBuyer = userBuyer.getBalance();
         int prevNumTickets = ticketBatch.getAmountAvailable();
-        System.out.println("prev: " + userSeller.getBalance());
         
         buy.RunTransaction(session);
 
@@ -67,8 +67,6 @@ public class BuyTest extends TestCase
         float creditSeller = userSeller.getBalance();
         float creditBuyer = userBuyer.getBalance();
         int numTickets = ticketBatch.getAmountAvailable();
-
-        System.out.println("post: " + userSeller.getBalance());
 
         assertEquals(price*num, creditSeller-prevCreditSeller);
         assertEquals(-1.0f*(price*num), creditBuyer-prevCreditBuyer);
@@ -78,4 +76,26 @@ public class BuyTest extends TestCase
         assertNull( Session.getTicketBatch(eventName+seller) );
     }
     
+    public void tearDown()
+    {
+        try {
+            Field field1 = Session.class.getDeclaredField("Users");
+            field1.setAccessible(true);
+            
+            Map<String,User> Users = (Map<String,User>)field1.get(Session.class);
+    
+            Users.clear();
+
+
+            Field field2 = Session.class.getDeclaredField("Tickets");
+            field2.setAccessible(true);
+
+            Map<String, TicketBatch> Tickets = (Map<String, TicketBatch>)field2.get(Session.class);
+    
+            Tickets.clear();
+        }
+        catch (Exception e) {
+            assertNotNull(e);
+        }
+    }
 }    

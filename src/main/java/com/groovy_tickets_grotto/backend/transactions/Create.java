@@ -15,6 +15,5 @@ public class Create extends Transaction
         User newUser = new User( ExtractUsername(), ExtractUsertype(), ExtractCredit() );
         // Add newly created user to the map of all users.
         Session.addUser(newUser);
-        // System.out.println("Ran Create!");
     }
 }

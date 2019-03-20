@@ -25,7 +25,6 @@ public class Buy extends Transaction
         User buyer = session.getCurrentUser();
 
         float cost = amount*price;
-        System.out.println("pre cred: " + buyer.getBalance() + "  pr: " + seller.getBalance());
 
         seller.setBalance( seller.getBalance() + cost );
         batch.setAmountAvailable( batch.getAmountAvailable() - amount );
@@ -34,9 +33,5 @@ public class Buy extends Transaction
         if ( batch.getAmountAvailable() < 1 ) {
             Session.RemoveTicketBatch( batch );
         }
-        
-        System.out.println("post cred: " + buyer.getBalance() + "  po: " + seller.getBalance());
-
-        System.out.println("RUNNING BUY  " + Session.GetUsers() + " \n\n");
     }
 }
