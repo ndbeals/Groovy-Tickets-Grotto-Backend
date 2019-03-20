@@ -16,12 +16,10 @@ public class TicketBatch
 	 */
 	public TicketBatch()
 	{
-
 	}
 
 	public TicketBatch( String event, String seller, int amount, float price )
 	{
-		super();
 		setEventName(event);
 		setSeller(seller);
 		setAmountAvailable(amount);

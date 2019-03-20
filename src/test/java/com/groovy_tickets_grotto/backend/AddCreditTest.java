@@ -1,6 +1,7 @@
 package com.groovy_tickets_grotto.backend;
 import com.groovy_tickets_grotto.backend.transactions.*;
 
+import org.junit.Test;
 
 import junit.framework.*;
 
@@ -25,6 +26,8 @@ public class AddCreditTest extends TestCase
 
         credit = 2000.0f;
     }
+
+    @Test
     public void testRunTransaction(){
         User user = Session.GetUserByName( "admin" );
 

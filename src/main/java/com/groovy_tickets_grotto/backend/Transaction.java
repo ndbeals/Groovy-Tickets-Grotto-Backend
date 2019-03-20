@@ -7,28 +7,14 @@ import com.groovy_tickets_grotto.backend.transactions.*;
  */
 public abstract class Transaction
 {
-	protected byte readPosition;
+	protected byte 		readPosition;
 
 	protected String    transactionString;
 	protected byte      transactionNumber;
 
-	// protected Session session;
 
 	public Transaction()
-	{
-		// readPosition = 3; // set to 3 because first 3 bytes of a transaction is the code, and it's already handled
-	}
-
-	// public Transaction( Session session)
-	// {
-	//     this.session = session;
-	// }
-	
-	public Transaction( String trn )
-	{
-		this();
-		setTransactionString( trn );
-	}
+	{}
 
 	/** setTransactionString
 	 * sets the transaction string

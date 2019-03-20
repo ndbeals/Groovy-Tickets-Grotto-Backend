@@ -16,7 +16,7 @@ public class Sell extends Transaction
         int num = ExtractTicketAmount();
         float price = ExtractTicketPrice();
 
-        Session.addTicketBatch( new TicketBatch(eventName,sellerName,num,price) );
+        Session.AddTicketBatch( new TicketBatch(eventName,sellerName,num,price) );
         
         
         // System.out.println("RUNNING SELL event: " + eventName + " seller: " + sellerName + " num: " +num +" price: " + price);

@@ -63,7 +63,8 @@ public class Session implements Runnable {
 																			// file
 	static private Map<String, TicketBatch> Tickets = new HashMap<String, TicketBatch>(); // Map of all tickets in the
 																							// system, loaded from file
-	// Member section
+	
+																							// Member section
 	private User currentUser; // current user this session is for, aka the user running all the transactions
 
 	public BlockingQueue<String> readQueue; // Queue that the read thread pushes each line it reads to, as fast as
@@ -71,9 +72,7 @@ public class Session implements Runnable {
 											// possible.
 	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
 
-	public String CurrentTransactions; // the string of all transactions (will be queue later)
-
-	public boolean finishedReading = false;
+	// public boolean finishedReading = false;
 
 
 	/**
@@ -82,27 +81,35 @@ public class Session implements Runnable {
 	 */
 
 	 
-
+	/** Session constructor
+	 * Creates initializes the read and transaction queues 
+	 */
 	public Session() {
 		transactionQueue = new LinkedList<Transaction>();
 		readQueue = new LinkedBlockingQueue<String>();
 		// readQueue = new LinkedBlockingQueue<Transaction>();
 	}
 
-	public Session(String endOfSessionLine, Queue<String> sessionTransactions) {
-		this();
-		this.currentUser = GetUserByName(endOfSessionLine.substring(3, 19).trim());
+	// Getters / Setters
 
-	}
-
+	/** getCurrentUser
+	 * returns the user this session is running under
+	 * @return User currentUser
+	 */
 	public User getCurrentUser() {
 		return this.currentUser;
 	}
-
+	/** setCurrentUser
+	 * sets the user this session runs under
+	 */
 	public void setCurrentUser(User currentUser) {
 		this.currentUser = currentUser;
 	}
+	//
 
+	/** runTransactions
+	 * runs/executes all of the transactions in a user session, once the user session transaction has been read
+	 */
 	private void runTransactions() {
 		while (!transactionQueue.isEmpty()) {
 			transactionQueue.removeFirst(); //.RunTransaction(this);
@@ -117,9 +124,8 @@ public class Session implements Runnable {
 		if (newTrn.getTransactionNumber() == 0) {
 			// then add it to the start of the queue
 			transactionQueue.addFirst(newTrn);
-			// then run the queue, after this has ran the queue will be empty, and ready to
-			// accept new transactions from the next user session
-			// runTransactions();
+			// then run the queue, after this has ran the queue will be empty, and ready to accept new transactions from the next user session
+			
 			return true;
 		} else {
 			transactionQueue.addLast(newTrn);
@@ -136,14 +142,14 @@ public class Session implements Runnable {
 			String line; // String var to store each line we read in
 			while ((line = reader.readLine()) != null) { // loop over transaction file
 				// Thread.sleep(1);
-				if (line.length()>0) {
+				if ( line.length()>0 ) {
 					readQueue.put(line);
 				}
 			}
 
 			readQueue.put(""); // When we're done executing, pass an empty string to signal we're done
 			// finish and close.
-			finishedReading = true;
+			// finishedReading = true;
 			reader.close();
 
 		} catch (Exception e) {
@@ -163,17 +169,18 @@ public class Session implements Runnable {
 	}
 
 	private void readAndExecuteTransactions() {
+		boolean canExecute = false;
 		Thread readThread = new Thread( this );
 		readThread.start();
-		int c = 0;
-		boolean canExecute;
 
-		// System.out.println("MAIN    :   Start: " + System.nanoTime() );
+		int c = 0;
 		long st = System.nanoTime();
+
 		try {
 			String transactionLine = readQueue.take();
 			
-			do {
+			while ( transactionLine.length()>0 )
+			{
 				canExecute = addTransaction( transactionLine );
 				c++;
 				if ( canExecute ) {
@@ -181,14 +188,14 @@ public class Session implements Runnable {
 				}
 				
 				transactionLine = readQueue.take();
-			} while ( transactionLine.length()>0 );
+			}
 
-		} catch (Exception e) {
-			PrintError(e);
-			// e.printStackTrace();
+		} catch (Exception e)
+		{
+			PrintError(e.toString());
 		}
 		
-		System.out.println("MAIN    : GOODBYE: " + ((System.nanoTime()-st)/1000000 ) + "   trn proc: " + c + "   fin read? " +finishedReading );
+		System.out.println("MAIN    : GOODBYE: " + ((System.nanoTime()-st)/1000000 ) + "   trn proc: " + c);
 	}
 	
 
@@ -214,7 +221,8 @@ public class Session implements Runnable {
 			}
 			writer.write("END");
 			writer.close();
-		}catch(IOException e){
+		} catch(IOException e)
+		{
 
 		}
 		
@@ -275,7 +283,6 @@ public class Session implements Runnable {
 				// parse line string into user if it isn't the end line
 				if ( !line.trim().equals( END_OF_FILE_STRING ) ) {
 					User aUser = new User( line );
-					// Users[ aUser.getUsername() ] = aUser;
 					// System.out.println( "a user: " + aUser.getBalance() );
 					Users.put( aUser.getUsername(), aUser);
 				}
@@ -297,7 +304,10 @@ public class Session implements Runnable {
 		}
 	}
 
-	static public void addTicketBatch( TicketBatch batch )
+	/** AddTicketBatch
+	 * Adds the given ticket batch the global map of ticket batches
+	 */
+	static public void AddTicketBatch( TicketBatch batch )
 	{
 		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
 	}

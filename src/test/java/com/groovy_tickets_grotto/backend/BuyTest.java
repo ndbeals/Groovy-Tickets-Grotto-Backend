@@ -1,8 +1,10 @@
 package com.groovy_tickets_grotto.backend;
 import com.groovy_tickets_grotto.backend.transactions.*;
 
+import org.junit.Test;
 
 import junit.framework.*;
+
 
 public class BuyTest extends TestCase
 {
@@ -44,13 +46,13 @@ public class BuyTest extends TestCase
         
         //Sets up the involved tickets
         ticketBatch = new TicketBatch(eventName, seller , num, price);
-        Session.addTicketBatch(ticketBatch);
+        Session.AddTicketBatch(ticketBatch);
         
         buy = new Buy();
         buy.setTransactionString("04 Test Event Title          admin           100 025.00");
     }
 
-
+    @Test
     public void test_BuyTransaction()
     {
         //Gets values for both balances and number of tickets in event
