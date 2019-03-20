@@ -51,6 +51,7 @@ public class SellTest extends TestCase
         assertEquals( cost , Session.getTicketBatch(eventName+sellerName).getCost() );
     }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

@@ -76,6 +76,7 @@ public class BuyTest extends TestCase
         assertNull( Session.getTicketBatch(eventName+seller) );
     }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

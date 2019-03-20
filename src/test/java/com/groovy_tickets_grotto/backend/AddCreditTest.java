@@ -44,6 +44,7 @@ public class AddCreditTest extends TestCase
         assertEquals(credit, newCredit-previousCredit);
     }
 
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

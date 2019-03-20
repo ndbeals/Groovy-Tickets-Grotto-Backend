@@ -54,6 +54,7 @@ public class RefundTest extends TestCase
         assertEquals(credit, prevSellerCredit-sellerCredit);
     }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

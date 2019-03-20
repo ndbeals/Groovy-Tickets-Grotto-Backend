@@ -1,45 +1,58 @@
 package com.groovy_tickets_grotto.backend;
 
+import java.lang.reflect.*;
+import java.util.*;
 import org.junit.Test;
 import junit.framework.*;
 
-public class SessionTest extends TestCase
-{
+public class SessionTest extends TestCase {
     protected Session session;
     protected User testUser1;
     protected User testUser2;
     protected TicketBatch testTicketBatch1;
     protected TicketBatch testTicketBatch2;
 
-
-    /** setUp
-     * Called before each test defined below is ran, this means that each test also tests what's in here.
+    /**
+     * setUp Called before each test defined below is ran, this means that each test
+     * also tests what's in here.
      */
     public void setUp() {
-        //Sets up the session
+        // Sets up the session
         session = new Session();
 
-        //Sets some users
+        // Sets some users
         testUser1 = new User("admin           AA 001000.00");
         testUser2 = new User("userFS          FS 901000.00");
 
-        
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Test
     public void test_Session_TestUser() {
-        int beforeCount = Session.GetUsers().size();
-        Session.addUser(testUser1);
-        Session.addUser(testUser2);
-        int afterCount = Session.GetUsers().size();
+        Field field1;
+        Map<String,User> Users;
 
-        assertEquals(beforeCount+2, afterCount);
-        assertEquals(testUser1, Session.GetUserByName("admin") );
-        assertEquals(testUser2, Session.GetUserByName("userFS") );
-
-        Session.deleteUser(testUser1);
-
-        assertEquals(afterCount-1, Session.GetUsers().size());
+        try {
+            field1 = Session.class.getDeclaredField("Users");
+            field1.setAccessible(true);
+            
+            Users = (Map<String,User>)field1.get(Session.class);
+            
+            int beforeCount = Users.size();
+            Session.addUser(testUser1);
+            Session.addUser(testUser2);
+            int afterCount = Users.size();
+    
+            assertEquals(beforeCount+2, afterCount);
+            assertEquals(testUser1, Session.GetUserByName("admin") );
+            assertEquals(testUser2, Session.GetUserByName("userFS") );
+    
+            Session.RemoveUser( testUser1.getUsername() );
+    
+            assertEquals(afterCount-1, Users.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     @Test

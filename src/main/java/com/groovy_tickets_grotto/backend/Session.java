@@ -143,12 +143,10 @@ public class Session implements Runnable {
 				}
 			}
 
-			readQueue.put(""); // When we're done executing, pass an empty string to signal we're done
-			// finish and close.
-			// finishedReading = true;
-			reader.close();
-
-		} catch (Exception e) {
+			readQueue.put("");	// When we're done executing, pass an empty string to signal we're done
+			reader.close();		// finish and close.
+		}
+		catch (Exception e) {
 			PrintError(e);
 			e.printStackTrace();
 		}
@@ -164,6 +162,9 @@ public class Session implements Runnable {
 		readTransactionFile();
 	}
 
+	/** readAndExecuteTransaction
+	 * this is the "bulk" of the execution. This starts the read thread, and then loops through the queue the read thread fills and runs those transactions it gets
+	 */
 	private void readAndExecuteTransactions() {
 		boolean canExecute = false;
 		Thread readThread = new Thread( this );
@@ -193,44 +194,11 @@ public class Session implements Runnable {
 		
 		System.out.println("MAIN    : GOODBYE: " + ((System.nanoTime()-st)/1000000 ) + "   trn proc: " + c);
 	}
-	
 
 
-	/**
-	 * Parses the transaction file stopping at entries stoping at
-	 * 00 entries to parse them.
-	 * @param fileName the name of the file with the transactions
-	 */
-
-
-	/**
-	 * Saves the users map to file in the correct format.
-	 */
-	static private void saveUsers()
-	{   
-		try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter("finished_users.txt"));
-			//Iterates over the map
-			for (Map.Entry<String, User> entry : Users.entrySet())
-			{
-				writer.write(entry.getValue().toString()+"\n");
-			}
-			writer.write("END");
-			writer.close();
-		} catch(IOException e)
-		{
-
-		}
-		
-	}
-	/**
-	 * Saves the tickets map to file in the correct format.
-	 */
-	static private void saveTickets()
-	{
-		// this function will save the tickets to the new available tickets file
-	}
-
+	/******************************************************************
+	 *                        STATIC SECTION
+	 ******************************************************************/
 
 	/** GetUserByName
 	 * returns user class based on the string name provided, if there is one
@@ -243,39 +211,57 @@ public class Session implements Runnable {
 		return Users.get( name.trim() );
 	}
 
-	static public Map<String, User> GetUsers()
-	{
-		return Users;
-	}
-
+	/** AddUser
+	 * adds the specified user to the global user map
+	 * @param newUser to be added
+	 */
 	static public void addUser( User newUser )
 	{
 		Users.put(newUser.getUsername(), newUser);
 	}
-
-	/*
-	* Removes the passed in user from the map.
-	*/
-	static public void deleteUser( User user )
-	{
-		Users.remove(user.getUsername());
-	}
-
-	static public void RemoveTicketBatch( TicketBatch batch )
-	{
-		Tickets.remove(batch.getEventName()+batch.getSeller().getUsername());
-	}
-
+	
+	/** RemoveUser
+	 * removes the specified user (by string name) from the global map
+	 * @param userName name of user to be removed
+	 */
 	static public void RemoveUser( String userName )
 	{
 		Users.remove( userName );
 	}
 
-	/**
-	 * parseUsersFile
+	/** RemoveTicketBatch
+	 * Removes the specified ticket batch from the global map
+	 * @param batch to be removed
+	 */
+	static public void RemoveTicketBatch( TicketBatch batch )
+	{
+		Tickets.remove(batch.getEventName()+batch.getSeller().getUsername());
+	}
+
+	/** AddTicketBatch
+	 * Adds the given ticket batch the global map of ticket batches
+	 * @param batch TicketBatch to be added to the global map
+	 */
+	static public void AddTicketBatch( TicketBatch batch )
+	{
+		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
+	}
+
+	/** GetTicketBatch
+	 * Returns the ticket batch with the same name as the passed string
+	 * @param eventName name of the event (+sellername) of the ticket batch
+	 * @return TicketBatch batch of tickets for sale
+	 */
+	static public TicketBatch getTicketBatch( String eventName )
+	{
+		return Tickets.get(eventName.trim());
+	}
+
+
+	/** parseUsersFile
 	 *  Parse the available users file into User class instances and store them on the static "Users" map.
 	 */
-	static private void ReadUsersFile()
+	static private void readUsersFile()
 	{
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
@@ -296,7 +282,7 @@ public class Session implements Runnable {
 		catch (IOException ex)
 		{
 			// catch exceptions and print them with error prefix
-			PrintError( ex.getLocalizedMessage() );
+			PrintError( ex );
 		} 
 		finally
 		{
@@ -304,29 +290,37 @@ public class Session implements Runnable {
 				reader.close();
 			} catch (Exception ex) {
 				// catch exceptions and print them with error prefix
-				PrintError( ex.getLocalizedMessage() );
+				PrintError( ex );
 			}
 		}
 	}
 
-	/** AddTicketBatch
-	 * Adds the given ticket batch the global map of ticket batches
+	/**
+	 * Saves the users map to file in the correct format.
 	 */
-	static public void AddTicketBatch( TicketBatch batch )
-	{
-		Tickets.put( batch.getEventName() + batch.getSeller().getUsername() , batch );
+	static private void saveUsers()
+	{   
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter("finished_users.txt"));
+			//Iterates over the map
+			for (Map.Entry<String, User> entry : Users.entrySet())
+			{
+				writer.write(entry.getValue().toString()+"\n");
+			}
+			writer.write( END_OF_FILE_STRING );
+			writer.close();
+		} 
+		catch(IOException ex) {
+			PrintError( ex );
+		}
+		
 	}
-
-	static public TicketBatch getTicketBatch( String eventName )
-	{
-		return Tickets.get(eventName.trim());
-	}
-
+	
 	/**
 	 * parseTicketsFile
 	 *  Parse the available tickets file and parse them into TicketBatch instances, populatice the static "Tickets" map
 	 */
-	static private void ReadTicketsFile()
+	static private void readTicketsFile()
 	{
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
@@ -348,7 +342,7 @@ public class Session implements Runnable {
 		catch (IOException ex)
 		{
 			// catch exceptions and print them with error prefix
-			PrintError( ex.getLocalizedMessage() );
+			PrintError( ex );
 		} 
 		finally
 		{
@@ -356,10 +350,19 @@ public class Session implements Runnable {
 				reader.close();
 			} catch (Exception ex) {
 				// catch exceptions and print them with error prefix
-				PrintError( ex.getLocalizedMessage() );
+				PrintError( ex );
 			}
 		}
 	}
+
+	/**
+	 * Saves the tickets map to file in the correct format.
+	 */
+	static private void saveTickets()
+	{
+		// this function will save the tickets to the new available tickets file
+	}
+
 	
 	/** parseCLIArguments
 	 * parse string passed to the executable into paths to the relevant files
@@ -381,10 +384,10 @@ public class Session implements Runnable {
 		parseCLIArguments( args );
 		
 		// Read in the user file into the map
-		ReadUsersFile();
+		readUsersFile();
 		
 		// Read the available tickets into the map
-		ReadTicketsFile();
+		readTicketsFile();
 		
 		Session session = new Session();
 		// parse merged transactions and execute them.

@@ -41,6 +41,7 @@ public class EndSessionTest extends TestCase
         assertEquals( userName , session.getCurrentUser().getUsername() );
     }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

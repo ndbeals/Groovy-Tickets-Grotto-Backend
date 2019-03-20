@@ -44,6 +44,7 @@ public class DeleteTest extends TestCase
         assertNull( Session.GetUserByName(username) );
     }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {

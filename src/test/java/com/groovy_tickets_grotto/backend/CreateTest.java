@@ -42,6 +42,7 @@ public class CreateTest extends TestCase
         assertEquals( credit , user.getBalance() );
         }
     
+    @SuppressWarnings("unchecked")
     public void tearDown()
     {
         try {
