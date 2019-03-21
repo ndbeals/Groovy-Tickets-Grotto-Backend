@@ -23,14 +23,12 @@ public class TicketBatchTest extends TestCase
         session = new Session();
         Session.addUser( user );
         Session.addUser( admin );
-        // session.setCurrentUser(userBuyer);
-        
 
         ticketBatch = new TicketBatch("Test Event Title", "admin", 100, 25.0f);
     }
 
     @Test
-    public void test_TicketBatch_FileConstructor() {
+    public void test_TicketBatch_StringConstructor() {
         fileLine = "Test Event Title          admin           100 025.00";
         fTicketBatch = new TicketBatch(fileLine);
     }

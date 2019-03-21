@@ -29,7 +29,7 @@ public class AddCreditTest extends TestCase
     }
 
     @Test
-    public void testRunTransaction(){
+    public void test_AddCreditTransaction(){
         User user = Session.GetUserByName( "admin" );
 
         addCredit = new AddCredit();

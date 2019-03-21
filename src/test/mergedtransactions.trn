@@ -1,8 +1,7 @@
 01 testadmin12     AA 612345.78
-01 userDeleteTest  BS 612345.78
-03 Test Event Title12        admin           100 025.00
-04 Test Event Title          userSS          002 025.00
 02 userDeleteTest  FS 001000.00
+03 Test Event Title12        admin           100 025.00
+04 Test Event Title          userSS          004 025.00
 05 userBS          userSS          000050.00
 06 brokeuser       FS 000100.00
 00 admin           AA 001000.00

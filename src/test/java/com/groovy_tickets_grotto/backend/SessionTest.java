@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import org.junit.Test;
 import junit.framework.*;
+import java.io.*;
 
 public class SessionTest extends TestCase {
     protected Session session;
@@ -23,7 +24,6 @@ public class SessionTest extends TestCase {
         // Sets some users
         testUser1 = new User("admin           AA 001000.00");
         testUser2 = new User("userFS          FS 901000.00");
-
     }
 
     @SuppressWarnings("unchecked")
@@ -76,23 +76,97 @@ public class SessionTest extends TestCase {
         assertEquals(testUser2, session.getCurrentUser() );
     }
 
-
-
+    
+    
     @Test
-    public void testFunctions(){
-        // session.setCurrentUser(testUser1);
-        // assertEquals(testUser1.getUsername(), session.getCurrentUser().getUsername());
+    /**
+     * This is the loop, decision and integration test of the system.
+     */
+    public void test_Session_Main() {
+        String[] fileLocations = {
+            "src/test/AvailableTickets.txt",
+            "src/test/CurrentUserAccounts.txt",
+            "src/test/mergedtransactions.trn",
+            "src/test/new_tickets.txt",
+            "src/test/new_users.txt"
+        };
 
-        // int size = session.getUsers().size();
-        // session.addUser(testUser1);
-        // session.addUser(testUser2);
-        // assertEquals(size, session.getUsers().size());
-        // assertEquals(session.getUser(testUser1.getUsername()).getBalance(), testUser1.getBalance());
+        Session.main( fileLocations );
 
-        // size = session.getTickets().size();
-        // session.addTicketBatch(testTicketBatch1);
-        // session.addTicketBatch(testTicketBatch2);
-        // assertEquals(size+2, session.getUsers().size());
-        // assertEquals(session.getTicketBatch(testTicketBatch1.getEventName()+testTicketBatch1.getSeller()).getEventName(), testTicketBatch1.getEventName());
+        assertTrue( compareFile("src/test/expected_tickets.txt","src/test/new_tickets.txt") );
+
+        assertTrue( compareFile("src/test/expected_users.txt","src/test/new_users.txt") );
+
+        File delme = new File("src/test/new_tickets.txt");
+        delme.delete();
+
+        delme = new File("src/test/new_users.txt");
+        delme.delete();
+    }
+
+    private boolean compareFile( String expectedPath, String actualPath )
+    {
+        ArrayList<String> expected = readFile( expectedPath );
+        ArrayList<String> actual   = readFile( actualPath );
+
+        Collections.sort(expected);
+        Collections.sort(actual);
+
+        return expected.equals(actual);
+    } 
+
+    private ArrayList<String> readFile( String path )
+    {
+        ArrayList<String> ret = new ArrayList<String>();
+
+        BufferedReader reader = null;
+		// create a buffered reader, and then try to open a file and read the file line by line
+		try {
+			File file   = new File( path );
+			reader      = new BufferedReader(new FileReader(file));
+			String line;
+
+			// Loop over each line, creating a user object and placing that object in the Users map
+			while ( (line = reader.readLine()) != null ) {
+                ret.add( line );
+			}
+            reader.close();
+		} 
+		catch (IOException ex)
+		{
+            fail("error in checking files");
+        } 
+
+        return ret;
+    }
+
+    /**
+     * The following code is to access and clean up private variables stored within the Session class. 
+     *  using reflection, i get a reference to the private field i want to access, set it's accessibility to true, then poll that field for the data
+     *  then I cast that data from an 'Object' back to the map i know it is. 
+     * Then the map gets cleared.
+     */    
+    @SuppressWarnings("unchecked")
+    public void tearDown()
+    {
+        try {
+            Field field1 = Session.class.getDeclaredField("Users");
+            field1.setAccessible(true);
+            
+            Map<String,User> Users = (Map<String,User>)field1.get(Session.class);
+    
+            Users.clear();
+
+
+            Field field2 = Session.class.getDeclaredField("Tickets");
+            field2.setAccessible(true);
+
+            Map<String, TicketBatch> Tickets = (Map<String, TicketBatch>)field2.get(Session.class);
+    
+            Tickets.clear();
+        }
+        catch (Exception e) {
+            assertNotNull(e);
+        }
     }
 }    

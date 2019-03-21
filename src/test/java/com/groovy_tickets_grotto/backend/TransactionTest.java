@@ -12,54 +12,64 @@ public class TransactionTest extends TestCase
     protected String transactionString;
     protected String className;
 
-    /** setUp
-     * Called before each test defined below is ran, this means that each test also tests what's in here.
-     */
-    public void setUp()
-    {
-        //Sets up the session
-        // session = new Session();
-    }
-
     @Test
-    public void testEndSessionCreateTransaction(){
+    public void test_Transaction_CreateEndSession()
+    {
         //Decision Coverage for CreateTransaction
         transactionString = "00 admin           AA 001000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("EndSession", className);
     } 
-    public void testCreateCreateTransaction(){
-        transactionString = "01 test            FS 001000.00";
+
+    @Test
+    public void test_Transaction_CreateCreateTransaction()
+    {
+        transactionString = "01 test_Transaction_            FS 001000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("Create", className);
     }
-    public void testDeleteCreateTransaction(){
+
+    @Test
+    public void test_Transaction_CreateDeleteTransaction()
+    {
         transactionString = "02 userSS          FS 001000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("Delete", className);
     }   
-    public void testSellCreateTransaction(){
+
+    @Test
+    public void test_Transaction_CreateSellTransaction()
+    {
         transactionString = "03 tEve                      admin           5   016.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("Sell", className);
     }   
-    public void testBuyCreateTransaction(){
+
+    @Test
+    public void test_Transaction_CreateBuyTransaction()
+    {
         transactionString = "04 Test Event Title          admin           100 025.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("Buy", className);
     }
-    public void testRefundCreateTransaction(){
+
+    @Test
+    public void test_Transaction_CreateRefundTransaction()
+    {
         transactionString = "05 admin           userFS          1000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();
         assertEquals("Refund", className);
     }   
-    public void testAddCreditCreateTransaction(){
+
+    @Test
+    public void test_Transaction_CreateAddCreditTransaction()
+    {
         transactionString = "06 admin           FS 002000.00";
         transaction = Transaction.CreateTransactionFromString(transactionString);
         className = transaction.getClass().getSimpleName();

@@ -39,10 +39,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
 
-// import org.apache.commons.cli.*;
-
-// import com.groovy_tickets_grotto.*;
-
 /**
  * Session Class This is the entrypoint to the system, this class is what
  * "brings it all together". it contains methods for file input and output,
@@ -51,8 +47,11 @@ import java.io.*;
  */
 public class Session implements Runnable {
 	// Constants section
-	static private final String AVAILABLE_USERS_FILE = "CurrentUserAccounts.txt"; // Available users file default location
-	static private final String AVAILABLE_TICKETS_FILE = "AvailableTickets.txt"; // Available tickets file default location
+	static private String oldAvailableUsersFile = "CurrentUserAccounts.txt"; // Available users file default location
+	static private String newAvailableUsersFile = "new_CurrentUserAccounts.txt"; // Available users file default location
+	static private String oldAvailableTicketsFile = "AvailableTickets.txt"; // Available tickets file default location
+	static private String newAvailableTicketsFile = "new_AvailableTickets.txt"; // Available tickets file default location
+	static private String mergedTransactionsFile = "mergedtransactions.trn";
 
 	static private final String ERROR_PROMPT = "ERROR: "; // prompt before all errors
 	static private final String END_OF_FILE_STRING = "END"; // end of file flag
@@ -68,22 +67,17 @@ public class Session implements Runnable {
 											// possible.
 	private Deque<Transaction> transactionQueue; // queue (deque implementation) of transactions to be ran.
 
-	// public boolean finishedReading = false;
-
-
-	/**
-	 * 											END OF VARIABLE DECLARATION
+	/**											END OF VARIABLE DECLARATION
 	 * ----------------------------------------------------------------------------------------------------------------
 	 */
-
 	 
 	/** Session constructor
 	 * Creates initializes the read and transaction queues 
 	 */
-	public Session() {
+	public Session()
+	{
 		transactionQueue = new LinkedList<Transaction>();
 		readQueue = new LinkedBlockingQueue<String>();
-		// readQueue = new LinkedBlockingQueue<Transaction>();
 	}
 
 	// Getters / Setters
@@ -92,13 +86,15 @@ public class Session implements Runnable {
 	 * returns the user this session is running under
 	 * @return User currentUser
 	 */
-	public User getCurrentUser() {
+	public User getCurrentUser()
+	{
 		return this.currentUser;
 	}
 	/** setCurrentUser
 	 * sets the user this session runs under
 	 */
-	public void setCurrentUser(User currentUser) {
+	public void setCurrentUser(User currentUser)
+	{
 		this.currentUser = currentUser;
 	}
 	//
@@ -106,14 +102,15 @@ public class Session implements Runnable {
 	/** runTransactions
 	 * runs/executes all of the transactions in a user session, once the user session transaction has been read
 	 */
-	private void runTransactions() {
+	private void runTransactions()
+	{
 		while (!transactionQueue.isEmpty()) {
-			transactionQueue.removeFirst(); //.RunTransaction(this);
+			transactionQueue.removeFirst().RunTransaction(this);
 		}
 	}
 
-	private boolean addTransaction(String trn) {
-	// private boolean addTransaction(Transaction newTrn) {
+	private boolean addTransaction(String trn)
+	{
 		Transaction newTrn = Transaction.CreateTransactionFromString(trn);
 
 		// If the transaction is an end of session (aka begin of sesion)
@@ -129,9 +126,10 @@ public class Session implements Runnable {
 		}
 	}
 
-	private void readTransactionFile() {
+	private void readTransactionFile()
+	{
 		try {
-			File transactionFile = new File("mergedtransactions.trn");
+			File transactionFile = new File( mergedTransactionsFile );
 			BufferedReader reader = new BufferedReader(new FileReader(transactionFile));
 			// ^ Create the file, file reader, and buffered reader we need.
 
@@ -150,7 +148,6 @@ public class Session implements Runnable {
 			PrintError(e);
 			e.printStackTrace();
 		}
-		System.out.println("  THREAD: GOODBYE: " + System.nanoTime() );
 	}
 
 	/** run
@@ -165,13 +162,11 @@ public class Session implements Runnable {
 	/** readAndExecuteTransaction
 	 * this is the "bulk" of the execution. This starts the read thread, and then loops through the queue the read thread fills and runs those transactions it gets
 	 */
-	private void readAndExecuteTransactions() {
+	private void readAndExecuteTransactions()
+	{
 		boolean canExecute = false;
 		Thread readThread = new Thread( this );
 		readThread.start();
-
-		int c = 0;
-		long st = System.nanoTime();
 
 		try {
 			String transactionLine = readQueue.take();
@@ -179,7 +174,6 @@ public class Session implements Runnable {
 			while ( transactionLine.length()>0 )
 			{
 				canExecute = addTransaction( transactionLine );
-				c++;
 				if ( canExecute ) {
 					runTransactions();
 				}
@@ -191,8 +185,6 @@ public class Session implements Runnable {
 		{
 			PrintError(e.toString());
 		}
-		
-		System.out.println("MAIN    : GOODBYE: " + ((System.nanoTime()-st)/1000000 ) + "   trn proc: " + c);
 	}
 
 
@@ -266,7 +258,7 @@ public class Session implements Runnable {
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
 		try {
-			File file   = new File( AVAILABLE_USERS_FILE );
+			File file   = new File( oldAvailableUsersFile );
 			reader      = new BufferedReader(new FileReader(file));
 			String line;
 
@@ -301,7 +293,7 @@ public class Session implements Runnable {
 	static private void saveUsers()
 	{   
 		try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter("finished_users.txt"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter( newAvailableUsersFile ));
 			//Iterates over the map
 			for (Map.Entry<String, User> entry : Users.entrySet())
 			{
@@ -313,7 +305,6 @@ public class Session implements Runnable {
 		catch(IOException ex) {
 			PrintError( ex );
 		}
-		
 	}
 	
 	/**
@@ -325,8 +316,8 @@ public class Session implements Runnable {
 		BufferedReader reader = null;
 		// create a buffered reader, and then try to open a file and read the file line by line
 		try {
-			File file = new File( AVAILABLE_TICKETS_FILE );
-			reader = new BufferedReader(new FileReader(file));
+			// File file = new File( newAvailableTicketsFile );
+			reader = new BufferedReader(new FileReader( oldAvailableTicketsFile ));
 			String line;
 
 			// Loop over each line, creating a ticketbatch object and placing that object in the tickets map
@@ -337,7 +328,6 @@ public class Session implements Runnable {
 					Tickets.put( aBatch.getEventName() + aBatch.getSeller().getUsername() , aBatch );
 				}
 			}
-
 		}
 		catch (IOException ex)
 		{
@@ -360,9 +350,20 @@ public class Session implements Runnable {
 	 */
 	static private void saveTickets()
 	{
-		// this function will save the tickets to the new available tickets file
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter( newAvailableTicketsFile ));
+			//Iterates over the map
+			for (Map.Entry<String, TicketBatch> entry : Tickets.entrySet())
+			{
+				writer.write(entry.getValue().toString()+"\n");
+			}
+			writer.write( END_OF_FILE_STRING );
+			writer.close();
+		} 
+		catch(IOException ex) {
+			PrintError( ex );
+		}
 	}
-
 	
 	/** parseCLIArguments
 	 * parse string passed to the executable into paths to the relevant files
@@ -370,6 +371,36 @@ public class Session implements Runnable {
 	static private void parseCLIArguments( String[] args )
 	{
 		// this command will parse command line arguments passed to it, or set defualts if non were passed
+		if ( args.length > 0 ) {
+			File ticketsFile = new File( args[0] );
+			if (ticketsFile.exists()) {
+				oldAvailableTicketsFile = ticketsFile.getAbsolutePath();
+			}
+		}
+
+		if ( args.length > 1 ) {
+			File usersFile = new File( args[1] );
+			if (usersFile.exists()) {
+				oldAvailableUsersFile = usersFile.getAbsolutePath();
+			}
+		}
+
+		if ( args.length > 2 ) {
+			File trnFile = new File( args[2] );
+			if (trnFile.exists()) {
+				mergedTransactionsFile = trnFile.getAbsolutePath();
+			}
+		}
+		
+		if ( args.length > 3 ) {
+			File newTickets = new File( args[3] );
+			newAvailableTicketsFile = newTickets.getAbsolutePath();
+		}
+
+		if ( args.length > 4 ) {
+			File newUsers = new File( args[4] );
+			newAvailableUsersFile = newUsers.getAbsolutePath();
+		}
 	}
 
 	/**
@@ -393,14 +424,11 @@ public class Session implements Runnable {
 		// parse merged transactions and execute them.
 		session.readAndExecuteTransactions();
 		
-		
-		System.out.println("hello world");
-
 		// save users
 		saveUsers();
 
 		// also save tickets
-		// SaveTickets();
+		saveTickets();
 	}
 
 	/** PrintError

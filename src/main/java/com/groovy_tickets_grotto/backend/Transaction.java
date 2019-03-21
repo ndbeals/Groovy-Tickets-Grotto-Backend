@@ -12,8 +12,7 @@ public abstract class Transaction
 	protected byte      transactionNumber;
 
 
-	public Transaction()
-	{}
+	public Transaction() {}
 
 	/** setTransactionString
 	 * sets the transaction string
@@ -24,18 +23,21 @@ public abstract class Transaction
 		setTransactionNumber( Byte.parseByte( trn.substring( readPosition, readPosition+2 ) ) );
 		readPosition+=3;
 	}
+
 	public String getTransactionString()
 	{
 		return this.transactionString;
 	}
 
-	public byte getTransactionNumber() {
+	public byte getTransactionNumber()
+	{
 		return this.transactionNumber;
 	}
-	public void setTransactionNumber(byte transactionNumber) {
+
+	public void setTransactionNumber(byte transactionNumber)
+	{
 		this.transactionNumber = transactionNumber;
 	}
-
 
 	public String ExtractUsername()
 	{

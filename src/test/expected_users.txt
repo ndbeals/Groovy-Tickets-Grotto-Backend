@@ -1,0 +1,6 @@
+userSS          SS 001050.00
+userBS          BS 001050.00
+admin           AA 000900.00
+brokeuser       FS 000100.00
+testadmin12     AA 612345.75
+END
