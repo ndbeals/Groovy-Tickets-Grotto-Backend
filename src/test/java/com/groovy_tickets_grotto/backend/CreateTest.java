@@ -28,7 +28,8 @@ public class CreateTest extends TestCase
     }
     
     @Test
-    public void test_CreateTransaction(){
+    public void test_CreateTransaction()
+    {
         create = new Create();
         create.setTransactionString("01 test            FS 123456.78");
     
@@ -40,8 +41,15 @@ public class CreateTest extends TestCase
         assertEquals( username , user.getUsername() );
         assertEquals( User.UserType.FS , user.getType() );
         assertEquals( credit , user.getBalance() );
-        }
+    }
+
     
+    /**
+     * The following code is to access and clean up private variables stored within the Session class. 
+     *  using reflection, i get a reference to the private field i want to access, set it's accessibility to true, then poll that field for the data
+     *  then I cast that data from an 'Object' back to the map i know it is. 
+     * Then the map gets cleared.
+     */    
     @SuppressWarnings("unchecked")
     public void tearDown()
     {

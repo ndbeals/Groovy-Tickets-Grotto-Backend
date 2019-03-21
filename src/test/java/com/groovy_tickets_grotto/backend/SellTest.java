@@ -51,6 +51,12 @@ public class SellTest extends TestCase
         assertEquals( cost , Session.getTicketBatch(eventName+sellerName).getCost() );
     }
     
+    /**
+     * The following code is to access and clean up private variables stored within the Session class. 
+     *  using reflection, i get a reference to the private field i want to access, set it's accessibility to true, then poll that field for the data
+     *  then I cast that data from an 'Object' back to the map i know it is. 
+     * Then the map gets cleared.
+     */    
     @SuppressWarnings("unchecked")
     public void tearDown()
     {
