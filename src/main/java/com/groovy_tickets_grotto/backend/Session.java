@@ -32,7 +32,6 @@
  * @since		March 2019
  *
  */
-
 package com.groovy_tickets_grotto.backend;
 
 import java.util.*;
@@ -146,7 +145,9 @@ public class Session implements Runnable {
 		}
 		catch (Exception e) {
 			PrintError(e);
-			e.printStackTrace();
+			// e.printStackTrace();
+			// readQueue.put(""); // signal we've met our end.
+			readQueue.add("");
 		}
 	}
 
@@ -372,16 +373,16 @@ public class Session implements Runnable {
 	{
 		// this command will parse command line arguments passed to it, or set defualts if non were passed
 		if ( args.length > 0 ) {
-			File ticketsFile = new File( args[0] );
-			if (ticketsFile.exists()) {
-				oldAvailableTicketsFile = ticketsFile.getAbsolutePath();
-			}
-		}
-
-		if ( args.length > 1 ) {
-			File usersFile = new File( args[1] );
+			File usersFile = new File( args[0] );
 			if (usersFile.exists()) {
 				oldAvailableUsersFile = usersFile.getAbsolutePath();
+			}
+		}
+		
+		if ( args.length > 1 ) {
+			File ticketsFile = new File( args[1] );
+			if (ticketsFile.exists()) {
+				oldAvailableTicketsFile = ticketsFile.getAbsolutePath();
 			}
 		}
 
@@ -391,15 +392,15 @@ public class Session implements Runnable {
 				mergedTransactionsFile = trnFile.getAbsolutePath();
 			}
 		}
-		
-		if ( args.length > 3 ) {
-			File newTickets = new File( args[3] );
-			newAvailableTicketsFile = newTickets.getAbsolutePath();
-		}
 
-		if ( args.length > 4 ) {
-			File newUsers = new File( args[4] );
+		if ( args.length > 3 ) {
+			File newUsers = new File( args[3] );
 			newAvailableUsersFile = newUsers.getAbsolutePath();
+		}
+		
+		if ( args.length > 4 ) {
+			File newTickets = new File( args[4] );
+			newAvailableTicketsFile = newTickets.getAbsolutePath();
 		}
 	}
 

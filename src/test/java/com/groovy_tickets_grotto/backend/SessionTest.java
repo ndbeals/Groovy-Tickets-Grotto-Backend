@@ -84,11 +84,11 @@ public class SessionTest extends TestCase {
      */
     public void test_Session_Main() {
         String[] fileLocations = {
-            "src/test/AvailableTickets.txt",
             "src/test/CurrentUserAccounts.txt",
+            "src/test/AvailableTickets.txt",
             "src/test/mergedtransactions.trn",
-            "src/test/new_tickets.txt",
-            "src/test/new_users.txt"
+            "src/test/new_users.txt",
+            "src/test/new_tickets.txt"
         };
 
         Session.main( fileLocations );
